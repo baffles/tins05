@@ -34,8 +34,8 @@ MENU mm[] = {
 
 DIALOG md[] = {
     { d_clear_proc, 0, 0, 800, 600, 0x00c0c0c0, 0x00c0c0c0, 0, 0, 0, 0, NULL, NULL, NULL },
-    { d_box_proc, 3, 50,  500, 500, 0x000000, 0xA0A0A0, 0, 0, 0, 0, NULL, NULL, NULL },
-    { d_box_proc, 506, 50,  42, 500, 0x000000, 0xA0A0A0, 0, 0, 0, 0, NULL, NULL, NULL },
+    //{ d_box_proc, 3, 50,  500, 500, 0x000000, 0xA0A0A0, 0, 0, 0, 0, NULL, NULL, NULL },
+    //{ d_box_proc, 506, 50,  42, 500, 0x000000, 0xA0A0A0, 0, 0, 0, 0, NULL, NULL, NULL },
     { d_menu_proc, 0, 0, 500, 10, 0x00000000, 0x00FFFFFF, 0, 0, 0, 0, mm, NULL, NULL },
     { d_edit_proc, 3, 16, 80, 30, 0x0, 0x00FFFFFF, 0, 0, 0, 0, insdata.ltex, NULL, NULL },
     { e_lw_proc, 3, 25, 40, 13, 0x0, 0xa0a0a0, 0, 0, 0, 0, "Down", NULL, NULL },
@@ -66,6 +66,7 @@ DIALOG nf[] = {
 int eproc_init()
 {
     sf = load_datafile("editor.dat");
+    insdata.eda = sf;
     if (!sf) return -1;
     
     insdata.curlayer = 0;
@@ -107,7 +108,9 @@ int load_tiles(char *filename) {
     }    
     insdata.tiles = g;
     
-    insdata.flags |= F_TILES_LOADED;
+    if (!(insdata.flags & F_TILES_LOADED)) {
+        insdata.flags |= F_TILES_LOADED;
+    }    
     
     return 0;
 }    
@@ -208,7 +211,7 @@ int e_damnit_proc(int msg, DIALOG *d, int c) {
             destroy_bitmap(d->dp);
             break;
         case MSG_DRAW:
-            
+            clear_bitmap(d->dp);
             if (insdata.mdata != NULL && (insdata.flags & F_TILES_LOADED)) {
                 for (y=d->d1;y<insdata.mdata->h && y<(d->h/40);y++) {
                     for (x=d->d2;x<insdata.mdata->w && x<(d->w/40);x++) {
@@ -225,7 +228,6 @@ int e_damnit_proc(int msg, DIALOG *d, int c) {
             if (!(insdata.flags & F_TILES_LOADED) || !insdata.mdata) rectfill(d->dp, 0, 0, d->w, d->h, 0xc0c0c0);
             
             if (!(insdata.flags & F_TILES_LOADED)) {
-                rectfill(d->dp, 0, 0, d->w, d->h, 0xc0c0c0);
                 textout_ex(d->dp, font, "No Tiles Loaded", 10, 10, 0x0, 0xc0c0c0);
             }    
             
@@ -277,7 +279,7 @@ int file_open()
     char path[1024];
     memset(path, 0, 1024);
     ret = file_select_ex("Load a Map file.", path, NULL, 1023, 0, 0);
-    if (ret != 0) return D_O_K;
+    if (ret == 0) return D_O_K;
     if (insdata.flags & F_MAP_OPENED) e_destroymap();
     insdata.mdata = load_map(path);
     if (insdata.mdata == NULL) return D_O_K;
@@ -303,7 +305,7 @@ int file_save()
     memset(path, 0, 1024);
     
     ret = file_select_ex("Save a Map file.", path, NULL, 1023, 0, 0);
-    if (ret != 0) return D_O_K;
+    if (ret == 0) return D_O_K;
     
     save_map(insdata.mdata, path);
     
@@ -316,12 +318,13 @@ int file_open_tiles() {
     memset(path, 0, 1024);
     
     ret = file_select_ex("Load a Tileset file.", path, NULL, 1023, 0, 0);
-    if (ret != 0) return D_O_K;
+    if (ret == 0) return D_O_K;
     
     ret = load_tiles(path);
     
     
-    return D_O_K;
+    
+    return D_REDRAW;
 }
     
 int file_close_tiles() {

@@ -29,6 +29,7 @@ map *create_map(int layers, int w, int h)
       }
     }
   }
+  return ret;
 }
 
 map *load_map(const char *filename)
