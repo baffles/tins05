@@ -31,5 +31,6 @@ void destroy_abitmap_instance(ABITMAP_INSTANCE *bmp);
 
 void update_animation(ABITMAP_INSTANCE *bmp);
 void ablit(ABITMAP_INSTANCE *source, BITMAP *dest, int dest_x, int dest_y);
+void ablit_r(ABITMAP_INSTANCE *source, BITMAP *dest, int dest_x, int dest_y, fixed angle);
 
 #endif

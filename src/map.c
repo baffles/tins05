@@ -14,6 +14,8 @@ map *create_map(int layers, int w, int h)
   ret->w = w;
   ret->h = h;
   ret->num_layers = layers;
+  memset(ret->actor_file, '\0', 512);
+  memset(ret->tile_file, '\0', 512);
   ret->layers = (layer *)malloc(sizeof(layer) * layers);
   for(z = 0; z < layers; ++z)
   {
@@ -36,16 +38,24 @@ map *load_map(const char *filename)
 {
   map *ret;
   PACKFILE *file;
-  int w, h, l, x, y, z, len;
-  char a_file[512];
+  int w, h, l, x, y, z, len, tw, th;
+  float f_ver;
+  char a_file[512], t_file[512];
   file = pack_fopen(filename, "r");
+  f_ver = pack_igetl(file);
   len = pack_igetl(file);
   pack_fread(a_file, len, file);
+  a_file[len] = '\0';
+  len = pack_igetl(file);
+  pack_fread(t_file, len, file);
+  t_file[len] = '\0';
   l = pack_igetl(file);
   h = pack_igetl(file);
   w = pack_igetl(file);
   strcpy(ret->actor_file, a_file);
+  strcpy(ret->tile_file, t_file);
   _actors = load_actors(a_file);
+  _tiles = load_tiles(t_file);
   ret = create_map(l, w, h);
   ret->w = w;
   ret->h = h;
@@ -78,8 +88,11 @@ int save_map(map *ret, const char *filename)
   file = pack_fopen(filename, "w");
   if(!file)
     return -1;
+  pack_iputl(1.3f, file); // put that its v1.3
   pack_iputl(strlen(ret->actor_file), file);
   pack_fwrite(ret->actor_file, strlen(ret->actor_file), file);
+  pack_iputl(strlen(ret->tile_file), file);
+  pack_fwrite(ret->tile_file, strlen(ret->tile_file), file);
   pack_iputl(ret->num_layers, file);
   pack_iputl(ret->h, file);
   pack_iputl(ret->w, file);
@@ -128,108 +141,4 @@ void destroy_map(map *ret)
   free(ret);
   
   destroy_actors(_actors);
-}
-
-
-// actor stuff
-actor **_actors = NULL;
-
-actor **load_actors(const char *filename)
-{
-  actor **ret;
-  PACKFILE *file;
-  int i, tot, len;
-  char *abfilename;
-  file = pack_fopen(filename, "r");
-  tot = pack_igetl(file);
-  ret = (actor **)malloc(sizeof(actor *) * (tot + 1));
-  for(i = 0; i < tot; ++i)
-  {
-    file = pack_fopen_chunk(file, 1);
-    ret[i] = (actor *)malloc(sizeof(actor));
-    len = pack_igetl(file);
-    abfilename = (char *)malloc(len + 1);
-    pack_fread(abfilename, len, file);
-    ret[i]->anim = load_abitmap(abfilename);
-    free(abfilename);
-    ret[i]->maxhealth = pack_igetl(file);
-    ret[i]->maxammo = pack_igetl(file);
-    ret[i]->defhealth = pack_igetl(file);
-    ret[i]->defammo = pack_igetl(file);
-    ret[i]->toughness = pack_igetl(file);
-    ret[i]->aggressiveness = pack_igetl(file);
-    ret[i]->id = i;
-    file = pack_fclose_chunk(file);
-  }
-  pack_fclose(file);
-  ret[tot] = NULL;
-  return ret;
-}
-
-int save_actors(actor **actors, const char *filename)
-{
-  PACKFILE *file;
-  int i, tot = 0;
-  file = pack_fopen(filename, "w");
-  if(!file)
-    return -1;
-  while(1)
-  {
-    if(actors[tot])
-      ++tot;
-    else
-      break;
-  }
-  pack_iputl(tot, file);
-  for(i = 0; i < tot; ++i)
-  {
-    file = pack_fopen_chunk(file, 1);
-    pack_iputl(strlen(actors[i]->anim_filename), file);
-    pack_fwrite(actors[i]->anim_filename, strlen(actors[i]->anim_filename), file);
-    pack_iputl(actors[i]->maxhealth, file);
-    pack_iputl(actors[i]->maxammo, file);
-    pack_iputl(actors[i]->defhealth, file);
-    pack_iputl(actors[i]->defammo, file);
-    pack_iputl(actors[i]->toughness, file);
-    pack_iputl(actors[i]->aggressiveness, file);
-    file = pack_fclose_chunk(file);
-  }
-  pack_fclose(file);
-  return 0;
-}
-
-void destroy_actors(actor **a)
-{
-  int i, tot = 0;
-  while(1)
-  {
-    if(a[tot])
-      ++tot;
-    else
-      break;
-  }
-  for(i = 0; i < tot; ++i)
-  {
-    destroy_abitmap(a[i]->anim);
-    free(a[i]);
-  }
-  free(a);
-}
-
-actor_instance *get_actor_instance(actor *a)
-{
-  actor_instance *ret;
-  ret = (actor_instance *)malloc(sizeof(actor_instance));
-  ret->parent = a;
-  ret->anim = grab_abitmap_instance(a->anim);
-  ret->health = a->defhealth;
-  ret->ammo = a->defammo;
-  return ret;
-}
-
-void destroy_actor_instance(actor_instance *a)
-{
-  a->parent = NULL;
-  destroy_abitmap_instance(a->anim);
-  free(a);
 }

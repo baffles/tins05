@@ -182,19 +182,58 @@ void game()
   // We gotta do something
   int done = 0;
   // load data & level
+  int x = 0, y = 0; fixed direction = 0, moving = 0;
+  ABITMAP *character;
+  ABITMAP_INSTANCE *char_ins;
+  character = load_abitmap("../media/mainchar.abm");
+  char_ins = grab_abitmap_instance(character);
   while(!done)
   {
     while(game_time > 0)
     {
       // logic
       if(key[KEY_ESC])
-        return;
+        done = 1;
+      if(key[KEY_LEFT] && x > 0)
+      {
+        --x;
+        direction = itofix(192);
+        moving = 1;
+      }
+      if(key[KEY_RIGHT] && x < SCREEN_W)
+      {
+        ++x;
+        direction = itofix(64);
+        moving = 1;
+      }
+      if(key[KEY_UP] && y > 0)
+      {
+        --y;
+        direction = itofix(0);
+        moving = 1;
+      }
+      if(key[KEY_DOWN] && y < SCREEN_H)
+      {
+        ++y;
+        direction = itofix(128);
+        moving = 1;
+      }
+      if(moving)
+        update_animation(char_ins);
+      moving = 0;
+      al_poll_duh(dumbp);
       --game_time;
     }
     while(game_time < 0); // let it catch up, no need in doing extra logic / drawing cycles
     // draw
+    clear_bitmap(buffer);
+    ablit_r(char_ins, buffer, x, y, direction);
+    textprintf_right_ex(buffer, font, SCREEN_W, 0, makecol(255,255,255), makecol(0,0,0), "FPS: %d", fps);
+    blit(buffer, screen, 0, 0, 0, 0, SCREEN_W, SCREEN_H);
     ++cfps;
   }
+  destroy_abitmap_instance(char_ins);
+  destroy_abitmap(character);
 }
 
 

@@ -125,4 +125,7 @@ void ablit(ABITMAP_INSTANCE *source, BITMAP *dest, int dest_x, int dest_y)
     blit(source->parent->frames[source->curframe], dest, 0, 0, dest_x, dest_y, source->parent->w, source->parent->h);
 }
 
-
+void ablit_r(ABITMAP_INSTANCE *source, BITMAP *dest, int dest_x, int dest_y, fixed angle)
+{
+  rotate_sprite(dest, source->parent->frames[source->curframe], dest_x, dest_y, angle);
+}
