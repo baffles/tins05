@@ -9,6 +9,7 @@
 #include "anim.h"
 
 FILE *logfile;
+BITMAP *buffer;
 
 int main()
 {
@@ -18,7 +19,6 @@ int main()
   ABITMAP_INSTANCE *cur_i;
   BITMAP *tmp; FILE *hmm;
   logfile = fopen("./abitmap_util.log", "w");
-  allegro_init();
   printf("Hey. This is ABITMAP Utility coming at you live from stdout!\n");
   printf("Please choose:\n L) Load and view an abitmap\n C) Create an abitmap\n");
   while(tolower(c) != 'l' && tolower(c) != 'c')
@@ -29,18 +29,24 @@ int main()
   }
   if(tolower(c) == 'l')
   {
-    set_color_depth(32);
     printf("Enter filename to view -> ");
     scanf("%s", filename);
     printf("\n");
     //if(file_exists(filename, FA_RDONLY, NULL) == 0)
-    if((hmm = fopen(filename, "r")) == NULL)
+    /*if((hmm = fopen(filename, "r")) == NULL)
     {
       printf("File doesnt exist! Bye bye\n");
       return -1;
     }
-    fclose(hmm);
+    fclose(hmm);*/
+    allegro_init();
+    set_color_depth(32);
     cur = load_abitmap(filename);
+    if(!cur)
+    {
+      printf("File doesn't exist! Bye bye\n");
+      return -1;
+    }
     cur_i = grab_abitmap_instace(cur);
     BASSERT(cur != NULL);
     BASSERT(cur_i != NULL);
@@ -48,16 +54,22 @@ int main()
     install_timer();
     install_timers();
     set_gfx_mode(GFX_AUTODETECT, 800, 600, 0, 0);
+    buffer = create_bitmap(SCREEN_W, SCREEN_H);
     while(!key[KEY_ESC])
     {
       update_animation(cur_i);
       vsync();
-      clear_bitmap(screen);
-      ablit(cur_i, screen, 0, 0);
+      clear_bitmap(buffer);
+      ablit(cur_i, buffer, 0, 0);
+      textprintf_right_ex(buffer, font, SCREEN_W, 0, makecol(255,255,255), makecol(0,0,0), "Frame: %d | ABM FPS: %d", cur_i->curframe, cur->fps);
+      textprintf_right_ex(buffer, font, SCREEN_W, 10, makecol(255,255,255), makecol(0,0,0), "%d", anim_counter % (60 / cur->fps));
+      textprintf_right_ex(buffer, font, SCREEN_W, 20, makecol(255,255,255), makecol(0,0,0), "DEBUG - cur frame count: %d", anim_counter);
+      blit(buffer, screen, 0, 0, 0, 0, SCREEN_W, SCREEN_H);
     }
   }
   else
   {
+    install_allegro(SYSTEM_NONE, &errno, atexit);
     set_color_depth(32);
     cur = (ABITMAP *)malloc(sizeof(ABITMAP));
     printf("How many frames? ");

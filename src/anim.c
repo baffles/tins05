@@ -6,12 +6,16 @@
 
 #include "anim.h"
 
+int lac = 0;
+
 ABITMAP *load_abitmap(const char *filename)
 {
   PACKFILE *abmp;
   ABITMAP *ret;
   int i, x, y;
   abmp = pack_fopen(filename, "r");
+  if(!abmp)
+    return NULL;
   ret = (ABITMAP *)malloc(sizeof(ABITMAP));
   ret->num_frames = pack_igetl(abmp);
   ret->fps = pack_igetl(abmp);
@@ -90,20 +94,23 @@ void destroy_abitmap_instance(ABITMAP_INSTANCE *bmp)
 void update_animation(ABITMAP_INSTANCE *bmp)
 {
   BASSERT(bmp);
+  
+ /* if(anim_counter == lac)
+    return;
+  lac = anim_counter;*/
+  
   // anim_counter goes up by 60 each second... we gotta calculate this with frames per second.
   // update. the curframe.
   if(anim_counter % (60 / bmp->parent->fps) == 0)
     ++bmp->curframe;
   
    // we dont want segfaults ;)
-  if(bmp->curframe == bmp->parent->num_frames)
-    //bmp->curframe -= bmp->parent->num_frames;
-    bmp->curframe = 0;
-  
+  if(bmp->curframe >= bmp->parent->num_frames)
+    bmp->curframe %= bmp->parent->num_frames;
   
   // keep it from overflowing
-  if(anim_counter >60 )
-    anim_counter %= 60;
+  if(anim_counter >= 60)
+    anim_counter -= 60;
 }
 
 void ablit(ABITMAP_INSTANCE *source, BITMAP *dest, int dest_x, int dest_y)
@@ -111,6 +118,7 @@ void ablit(ABITMAP_INSTANCE *source, BITMAP *dest, int dest_x, int dest_y)
   BASSERT(source);
   BASSERT(source->parent);
   BASSERT(source->parent->frames);
+  //printf("%d ", source->curframe);
   if(source->parent->masked)
     masked_blit(source->parent->frames[source->curframe], dest, 0, 0, dest_x, dest_y, source->parent->w, source->parent->h);
   else

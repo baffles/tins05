@@ -16,7 +16,7 @@ int install_timers()
   LOCK_VARIABLE(fpsct);
   LOCK_VARIABLE(anim_counter);
   LOCK_FUNCTION(game_timer);
-  return install_int_ex(game_timer, BPS_TO_TIMER(60)) == 0 ? install_int_ex(anim_timer, BPS_TO_TIMER(60)) : 1;
+  return install_int_ex(game_timer, BPS_TO_TIMER(60)) == 0 ? install_int_ex(anim_timer, BPS_TO_TIMER(60)) == 0 : 1;
 }
 
 void uninstall_timers()

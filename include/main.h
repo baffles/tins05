@@ -17,4 +17,8 @@ extern FILE *logfile;
 
 int init();
 
+void introduction();
+int menu();
+void game();
+
 #endif

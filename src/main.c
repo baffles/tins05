@@ -4,6 +4,10 @@
 // main.c
 // main / logging functions
 
+#include "main.h"
+#include "timers.h"
+#include "anim.h"
+#error i dont want this compiling atm.
 FILE *logfile = NULL;
 
 int init()
@@ -54,10 +58,81 @@ void deinit()
   logfile = NULL;
 }
 
+
+void introduction()
+{
+  BITMAP *logo;
+  logo = load_bitmap("../media/logo86.bmp", NULL);
+  blit(logo, screen, 0, 0, 0, 0, 800, 600);
+  sleep(3000);
+}
+
+int menu()
+{
+  BITMAP *logo;
+  logo = load_bitmap("../media/logo.bmp", NULL);
+  int done = 0;
+  while(!done)
+  {
+    while(game_time > 0)
+    {
+      // logic
+      if(keypressed())
+        return -1; // exit
+      --game_time;
+    }
+    while(game_time < 0); // let it catch up
+    blit(logo, screen, 0, 0, (SCREEN_W / 2) - (logo->w / 2), 0, logo->w, logo->h);
+    textprintf_right_ex(screen, font, SCREEN_W, 0, makecol(255,255,255), makecol(0,0,0), "FPS: %d", fps);
+    masked_blit(mouse_sprite, screen, 0, 0, mouse_x, mouse_y, mouse_sprite->w, mouse_sprite->h);
+    ++cfps;
+  }
+}
+
+void game()
+{
+  // We gotta do something
+  int done = 0;
+  // load data & level
+  while(!done)
+  {
+    while(game_time > 0)
+    {
+      // logic
+      --game_time;
+    }
+    while(game_time < 0); // let it catch up, no need in doing extra logic / drawing cycles
+    // draw
+    ++cfps;
+  }
+}
+
+
 int main(int argc, char *argv[])
 {
+  int menu_choice, done = 0;
   init();
-  //game();
+  introduction();
+  while(!done)
+  {
+    menu_choice = menu();
+    switch(menu_choice)
+    {
+      case 0:
+        // start a new game
+        break;
+      case 1:
+        // show the help page
+        break;
+      case 2:
+        // show the about page
+        break;
+      default:
+        // exit
+        done = 1;
+        break;
+    }
+  }
   deinit();
 }
 END_OF_MAIN()
