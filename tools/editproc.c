@@ -228,7 +228,7 @@ int e_damnit_proc(int msg, DIALOG *d, int c) {
                 textout_ex(d->dp, font, "No Map Loaded", 10, 20, 0x0, 0xc0c0c0);
             }   
             
-            blit(d->dp, screen, 0, 0, d->w, d->h, 0, 0);
+            blit(d->dp, gui_get_screen(), 0, 0, d->w, d->h, 0, 0);
             
             
             break;

@@ -220,7 +220,7 @@ actor_instance *get_actor_instance(actor *a)
   actor_instance *ret;
   ret = (actor_instance *)malloc(sizeof(actor_instance));
   ret->parent = a;
-  ret->anim = (ABITMAP_INSTANCE *)grab_abitmap_instance(a->anim);
+  ret->anim = grab_abitmap_instance(a->anim);
   ret->health = a->defhealth;
   ret->ammo = a->defammo;
   return ret;

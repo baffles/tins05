@@ -66,7 +66,7 @@ int save_abitmap(const char *filename, ABITMAP *bmp)
   pack_fclose(abmp);
 }
 
-ABITMAP_INSTANCE *grab_abitmap_instace(ABITMAP *bmp)
+ABITMAP_INSTANCE *grab_abitmap_instance(ABITMAP *bmp)
 {
   ABITMAP_INSTANCE *ret;
   ret = (ABITMAP_INSTANCE *)malloc(sizeof(ABITMAP_INSTANCE));

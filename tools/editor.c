@@ -3,6 +3,7 @@
 
 #include "editproc.h"
 
+FILE *logfile;
    
 
 int main() {
