@@ -20,6 +20,9 @@
 #define ARMOR   16
 #define PIT     (EXIT | HEALTH)
 #define WALKWAY (EXIT | AMMO)
+#define REG_SP  32
+#define TROLL1  64
+#define TROLL2  128
 
 typedef struct cell
 {
