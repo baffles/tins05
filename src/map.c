@@ -86,7 +86,7 @@ map *load_map(const char *filename)
         
         sev = pack_igetl(file);
         if (sev && _actors) {
-            ret->layers[z].data[y][x].act = get_actor_instance(_actors[sev]);
+            //ret->layers[z].data[y][x].act = get_actor_instance(_actors[sev]);
         }
          
       }

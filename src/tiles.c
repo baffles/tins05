@@ -10,7 +10,7 @@ tile *_tiles = NULL;
 
 tile *load_tiles(const char *filename)
 {
-  int i, x, y, x2, y2, w, h, len, ta, td;
+  int i, x, y, x2, y2, w, h, len, ta, td, r,g,b;
   char filename_[512];
   tile *ret;
   PACKFILE *file;
