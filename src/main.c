@@ -15,6 +15,8 @@ DUH *ck094;
 AL_DUH_PLAYER *dumbp;
 ALFONT_FONT *tfont;
 
+BITMAP *buffer;
+
 int init()
 {
   char tempstr[512];
@@ -63,10 +65,12 @@ int init()
   alfont_init();
   tfont = alfont_load_font("../media/BIRDMAN.TTF");
   alfont_set_font_size(tfont, 14);
+  buffer = create_bitmap(SCREEN_W, SCREEN_H);
 }
 
 void deinit()
 {
+  destroy_bitmap(buffer);
   if(logfile)
     fclose(logfile);
   logfile = NULL;
@@ -96,10 +100,9 @@ void introduction()
 
 int menu()
 {
-  BITMAP *logo, *buffer, *buttons[6];
+  BITMAP *logo, *buttons[6];
   int i, done;
   logo = load_bitmap("../media/teampink.bmp", NULL);
-  buffer = create_bitmap(SCREEN_W, SCREEN_H);
   buttons[0] = load_bitmap("../media/buttons/about.bmp", NULL);
   buttons[1] = load_bitmap("../media/buttons/back.bmp", NULL);
   buttons[2] = load_bitmap("../media/buttons/help.bmp", NULL);
@@ -158,10 +161,20 @@ int menu()
     blit(buffer, screen, 0, 0, 0, 0, SCREEN_W, SCREEN_H);
     ++cfps;
   }
-  destroy_bitmap(buffer);
   destroy_bitmap(logo);
   for(i = 0; i < 6; ++i)
     destroy_bitmap(buttons[i]);
+}
+
+
+void about()
+{
+  // about page
+}
+
+void help()
+{
+  // help page
 }
 
 void game()
@@ -174,6 +187,8 @@ void game()
     while(game_time > 0)
     {
       // logic
+      if(key[KEY_ESC])
+        return;
       --game_time;
     }
     while(game_time < 0); // let it catch up, no need in doing extra logic / drawing cycles
@@ -195,12 +210,21 @@ int main(int argc, char *argv[])
     {
       case 0:
         // start a new game
+        game();
+        sleep(100);
+        poll_keyboard();
         break;
       case 1:
         // show the help page
+        help();
+        sleep(100);
+        poll_keyboard();
         break;
       case 2:
         // show the about page
+        about();
+        sleep(100);
+        poll_keyboard();
         break;
       default:
         // exit

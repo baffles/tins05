@@ -12,7 +12,7 @@
 typedef struct actor 
 {
     ABITMAP *anim;
-    int maxhealth, maxammo, toughness, aggressiveness;
+    int maxhealth, maxammo, defhealth, defammo, toughness, aggressiveness, id;
 } actor;
 
 typedef struct actor_instance
@@ -25,7 +25,8 @@ typedef struct actor_instance
 
 typedef struct cell
 {
-  int tile, flags, trans, blocking;
+  int tile, flags;
+  char trans, blocking;
   actor_instance *act;
 } cell;
 
@@ -41,8 +42,19 @@ typedef struct map
   layer *layers;
 } map;
 
-map *load_map(char *filename);
-int save_map(map *map, char *filename);
+map *create_map(int layers, int w, int h);
+map *load_map(const char *filename);
+int save_map(map *map, const char *filename);
 void destroy_map(map *map);
+
+// actors
+extern actor **_actors;
+
+actor **load_actors(const char *filename);
+int save_actors(actor **actors, const char *filename);
+void destroy_actors(actor **a);
+
+actor_instance *get_actor_instance(actor *actor);
+void destroy_actor_instance(actor_instance *a);
 
 #endif
