@@ -14,13 +14,13 @@ typedef struct cell
 
 typedef struct layer
 {
-  int w, h, sx, sy;
+  int flags;
   cell **data;
 } layer;
 
 typedef struct map
 {
-  int w, h, layers;
+  int w, h, layers, actor_layer;
   layer *layers;
 } map;
 
