@@ -53,8 +53,10 @@ map *load_map(const char *filename)
   h = pack_igetl(file);
   w = pack_igetl(file);
   
-  if (strlen(a_file)) _actors = load_actors(a_file);
-  if (strlen(t_file)) _tiles = load_tiles(t_file);
+  if(strlen(a_file))
+    _actors = load_actors(a_file);
+  if(strlen(t_file))
+    _tiles = load_tiles(t_file);
   ret = create_map(l, w, h);
   
   strcpy(ret->actor_file, a_file);
@@ -136,6 +138,8 @@ int save_map(map *ret, const char *filename)
 
 void destroy_map(map *ret)
 {
+  if(!ret)
+    return;
   int x, y, z;
   for(z = 0; z < ret->num_layers; ++z)
   {

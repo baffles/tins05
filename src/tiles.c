@@ -57,6 +57,8 @@ tile *load_tiles(const char *filename)
 
 void destroy_tiles(tile *t)
 {
+  if(!t)
+    return;
   int tot = 0, i;
   while(1)
   {

@@ -104,7 +104,8 @@ actor_instance *get_actor_instance(actor *a)
 
 void destroy_actor_instance(actor_instance *a)
 {
-  if (!a) return;
+  if (!a)
+    return;
   a->parent = NULL;
   destroy_abitmap_instance(a->anim);
   free(a);
