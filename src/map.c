@@ -6,38 +6,6 @@
 
 #include "map.h"
 
-/*typedef struct actor 
-{
-    ABITMAP *anim;
-    int maxhealth, maxammo, toughness, aggressiveness;
-} actor;
-
-typedef struct actor_instance
-{
-    actor *parent;
-    ABITMAP_INSTANCE *anim;
-    int health, ammo;
-} actor_instance;
-
-
-typedef struct cell
-{
-  int tile, flags, trans, blocking;
-  actor_instance *act;
-} cell;
-
-typedef struct layer
-{
-  int flags;
-  cell **data;
-} layer;
-
-typedef struct map
-{
-  int w, h, num_layers;
-  layer *layers;
-} map;*/
-
 map *create_map(int layers, int w, int h)
 {
   map *ret;
@@ -67,11 +35,16 @@ map *load_map(const char *filename)
 {
   map *ret;
   PACKFILE *file;
-  int w, h, l, x, y, z;
+  int w, h, l, x, y, z, len;
+  char a_file[512];
   file = pack_fopen(filename, "r");
+  len = pack_igetl(file);
+  pack_fread(a_file, len, file);
   l = pack_igetl(file);
   h = pack_igetl(file);
   w = pack_igetl(file);
+  strcpy(ret->actor_file, a_file);
+  _actors = load_actors(a_file);
   ret = create_map(l, w, h);
   ret->w = w;
   ret->h = h;
@@ -104,6 +77,8 @@ int save_map(map *map, const char *filename)
   file = pack_fopen(filename, "w");
   if(!file)
     return -1;
+  pack_iputl(strlen(map->actor_file), file);
+  pack_fwrite(map->actor_file, strlen(map->actor_file), file);
   pack_iputl(map->num_layers, file);
   pack_iputl(map->h, file);
   pack_iputl(map->w, file);
@@ -147,14 +122,110 @@ void destroy_map(map *map)
   }
   free(map->layers);
   free(map);
+  
+  destroy_actors(_actors);
 }
 
 
 // actor stuff
+actor **_actors = NULL;
 
-actor **load_actors(const char *filename);
-int save_actors(actor **actors, const char *filename);
-void destroy_actors(actor **a);
+actor **load_actors(const char *filename)
+{
+  actor **ret;
+  PACKFILE *file;
+  int i, tot, len;
+  char *abfilename;
+  file = pack_fopen(filename, "r");
+  tot = pack_igetl(file);
+  ret = (actor **)malloc(sizeof(actor *) * (tot + 1));
+  for(i = 0; i < tot; ++i)
+  {
+    file = pack_fopen_chunk(file, 1);
+    ret[i] = (actor *)malloc(sizeof(actor));
+    len = pack_igetl(file);
+    abfilename = (char *)malloc(len + 1);
+    pack_fread(abfilename, len, file);
+    ret[i]->anim = load_abitmap(abfilename);
+    free(abfilename);
+    ret[i]->maxhealth = pack_igetl(file);
+    ret[i]->maxammo = pack_igetl(file);
+    ret[i]->defhealth = pack_igetl(file);
+    ret[i]->defammo = pack_igetl(file);
+    ret[i]->toughness = pack_igetl(file);
+    ret[i]->aggressiveness = pack_igetl(file);
+    ret[i]->id = i;
+    file = pack_fclose_chunk(file);
+  }
+  pack_fclose(file);
+  ret[tot] = NULL;
+  return ret;
+}
 
-actor_instance *get_actor_instance(actor *actor);
-void destroy_actor_instance(actor_instance *a);
+int save_actors(actor **actors, const char *filename)
+{
+  PACKFILE *file;
+  int i, tot = 0;
+  file = pack_fopen(filename, "w");
+  if(!file)
+    return -1;
+  while(1)
+  {
+    if(actors[tot])
+      ++tot;
+    else
+      break;
+  }
+  pack_iputl(tot, file);
+  for(i = 0; i < tot; ++i)
+  {
+    file = pack_fopen_chunk(file, 1);
+    pack_iputl(strlen(actors[i]->anim_filename), file);
+    pack_fwrite(actors[i]->anim_filename, strlen(actors[i]->anim_filename), file);
+    pack_iputl(actors[i]->maxhealth, file);
+    pack_iputl(actors[i]->maxammo, file);
+    pack_iputl(actors[i]->defhealth, file);
+    pack_iputl(actors[i]->defammo, file);
+    pack_iputl(actors[i]->toughness, file);
+    pack_iputl(actors[i]->aggressiveness, file);
+    file = pack_fclose_chunk(file);
+  }
+  pack_fclose(file);
+  return 0;
+}
+
+void destroy_actors(actor **a)
+{
+  int i, tot = 0;
+  while(1)
+  {
+    if(a[tot])
+      ++tot;
+    else
+      break;
+  }
+  for(i = 0; i < tot; ++i)
+  {
+    destroy_abitmap(a[i]->anim);
+    free(a[i]);
+  }
+  free(a);
+}
+
+actor_instance *get_actor_instance(actor *actor)
+{
+  actor_instance *ret;
+  ret = (actor_instance *)malloc(sizeof(actor_instance));
+  ret->parent = actor;
+  ret->anim = grab_abitmap_instance(actor->anim);
+  ret->health = actor->defhealth;
+  ret->ammo = actor->defammo;
+  return ret;
+}
+
+void destroy_actor_instance(actor_instance *a)
+{
+  a->parent = NULL;
+  destroy_abitmap_instance(a->anim);
+  free(a);
+}

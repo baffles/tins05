@@ -11,15 +11,16 @@
 
 typedef struct actor 
 {
-    ABITMAP *anim;
-    int maxhealth, maxammo, defhealth, defammo, toughness, aggressiveness, id;
+  ABITMAP *anim;
+  char anim_filename[512];
+  int maxhealth, maxammo, defhealth, defammo, toughness, aggressiveness, id;
 } actor;
 
 typedef struct actor_instance
 {
-    actor *parent;
-    ABITMAP_INSTANCE *anim;
-    int health, ammo;
+  actor *parent;
+  ABITMAP_INSTANCE *anim;
+  int health, ammo;
 } actor_instance;
 
 
@@ -39,6 +40,7 @@ typedef struct layer
 typedef struct map
 {
   int w, h, num_layers;
+  char actor_file[512];
   layer *layers;
 } map;
 
