@@ -4,7 +4,7 @@
 // timers.c
 // timer functions
 
-#include "main.h"
+#include "timers.h"
 
 volatile int fps = 0, cfps = 0, game_time = 0, fpsct = 0, anim_counter = 0;
 
@@ -21,12 +21,13 @@ int install_timers()
 
 void uninstall_timers()
 {
-  remove_int(game_time);
+  remove_int(game_timer);
+  remove_int(anim_timer);
 }
 
-void game_time()
+void game_timer()
 {
-  ++game_timer;
+  ++game_time;
   if(++fpsct == 60)
   {
     fps = cfps;
@@ -39,4 +40,4 @@ void anim_timer()
 {
   ++anim_counter;
 }
-END_OF_FUNTION(anim_timer);
+END_OF_FUNCTION(anim_timer);

@@ -12,7 +12,7 @@
 
 typedef struct ABITMAP
 {
-  int num_frames, fps, w, h;
+  int num_frames, fps, w, h, masked;
   BITMAP **frames;
 } ABITMAP;
 
@@ -24,7 +24,7 @@ typedef struct ABITMAP_INSTANCE
 
 ABITMAP *load_abitmap(const char *filename);
 int save_abitmap(const char *filename, ABITMAP *bmp);
-ABITMAP_INSTANCE *grab_instance(ABITMAP *bmp);
+ABITMAP_INSTANCE *grab_abitmap_instace(ABITMAP *bmp);
 
 void destroy_abitmap(ABITMAP *bmp);
 void destroy_abitmap_instance(ABITMAP_INSTANCE *bmp);
