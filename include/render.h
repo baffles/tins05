@@ -9,6 +9,8 @@
 
 #include "main.h"
 
+extern int soffset;
+
 void draw_sine(int length, BITMAP *b, int startx, int starty, int stopx, int stopy, int col);
 
 #endif
