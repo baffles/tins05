@@ -47,7 +47,7 @@ int main()
       printf("File doesn't exist! Bye bye\n");
       return -1;
     }
-    cur_i = grab_abitmap_instace(cur);
+    cur_i = grab_abitmap_instance(cur);
     BASSERT(cur != NULL);
     BASSERT(cur_i != NULL);
     install_keyboard();

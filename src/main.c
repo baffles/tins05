@@ -8,6 +8,8 @@
 #include "timers.h"
 #include "anim.h"
 #include "render.h"
+#include "map.h"
+#include "tiles.h"
 //#error i dont want this compiling atm.
 FILE *logfile = NULL;
 DUH *beyondfo;
@@ -92,18 +94,16 @@ void deinit()
 void introduction()
 {
   BITMAP *logo;
-  dumbp = al_start_duh(beyondfo, 2, 0, 1.0f, 8192, 48000);
+  int i;
+  dumbp = al_start_duh(beyondfo, 2, 0, 1.0f, 8192, 41000);
+  al_poll_duh(dumbp);
   logo = load_bitmap("../media/logo86.bmp", NULL);
   blit(logo, screen, 0, 0, 0, 0, 800, 600);
-  al_poll_duh(dumbp);
-  sleep(750);
-  al_poll_duh(dumbp);
-  sleep(750);
-  al_poll_duh(dumbp);
-  sleep(750);
-  al_poll_duh(dumbp);
-  sleep(750);
-  al_poll_duh(dumbp);
+  for(i = 0; i < 3000; i += 150)
+  {
+    al_poll_duh(dumbp);
+    sleep(150);
+  }
 }
 
 int menu()
@@ -392,16 +392,21 @@ void game()
   int cx = 0, cy = 0; fixed cdirection = 0, cmoving = 0;
   int t1x = 0, t1y = 0; fixed t1direction = 0, t1moving = 0;
   int t2x = 0, t2y = 0; fixed t2direction = 0, t2moving = 0;
+  int x, y, z;
   ABITMAP *character, *troll1, *troll2;
   ABITMAP_INSTANCE *char_ins, *troll1_ins, *troll2_ins;
+  map *mp;
   character = load_abitmap("../media/mainchar.abm");
   char_ins = grab_abitmap_instance(character);
   troll1 = load_abitmap("../media/troll01.abm");
   troll1_ins = grab_abitmap_instance(troll1);
   troll2 = load_abitmap("../media/troll02.abm");
   troll2_ins = grab_abitmap_instance(troll2);
+  mp = load_map("../media/test.map");
+  // ugly hack to make it work :(
+  _tiles = load_tiles("../media/tileset.tls");
   al_stop_duh(dumbp);
-  dumbp = al_start_duh(ck094, 2, 0, 1.0f, 8192, 48000);
+  dumbp = al_start_duh(ck094, 2, 0, 1.0f, 8192, 41000);
   while(!done)
   {
     while(game_time > 0)
@@ -459,7 +464,7 @@ void game()
       // troll 1
       if(key[KEY_4_PAD] && t1x > 0)
       {
-        --cx;
+        --t1x;
         t1direction = itofix(192);
         t1moving = 1;
       }
@@ -565,6 +570,19 @@ void game()
     while(game_time < 0); // let it catch up, no need in doing extra logic / drawing cycles
     // draw
     clear_bitmap(buffer);
+    for(z = 0; z < mp->num_layers; ++z)
+    {
+      for(y = 0; y < mp->h; ++y)
+      {
+        for(x = 0; x < mp->w; ++x)
+        {
+          if(mp->layers[z].data[y][x].trans)
+            masked_blit(_tiles[mp->layers[z].data[y][x].tile].bmp, buffer, 0, 0, x * 40, y * 40, 40, 40);
+          else
+            blit(_tiles[mp->layers[z].data[y][x].tile].bmp, buffer, 0, 0, x * 40, y * 40, 40, 40);
+        }
+      }
+    }
     ablit_r(char_ins, buffer, cx, cy, cdirection);
     ablit_r(troll1_ins, buffer, t1x, t1y, t1direction);
     ablit_r(troll2_ins, buffer, t2x, t2y, t2direction);
@@ -594,7 +612,7 @@ int main(int argc, char *argv[])
         sleep(100);
         poll_keyboard();
         al_stop_duh(dumbp);
-        dumbp = al_start_duh(beyondfo, 2, 0, 1.0f, 8192, 48000);
+        dumbp = al_start_duh(beyondfo, 2, 0, 1.0f, 8192, 41000);
         al_poll_duh(dumbp);
         break;
       case 2:
