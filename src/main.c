@@ -58,7 +58,7 @@ int init()
   beyondfo = dumb_load_mod("../media/music.dat#BEYONDFO");
   ck094 = dumb_load_it("../media/music.dat#CK094");*/
   dumb_register_stdfiles();
-  beyondfo = dumb_load_mod("../beyondfo.mod");
+  beyondfo = dumb_load_mod("../media/beyondfo.mod");
   ck094 = dumb_load_it("../media/ck094.it");
   alfont_init();
   tfont = alfont_load_font("../media/BIRDMAN.TTF");
@@ -76,52 +76,92 @@ void deinit()
   alfont_destroy_font(tfont);
   alfont_exit();
 }
-void this_is_temporary() { al_poll_duh(dumbp); }
 
 void introduction()
 {
   BITMAP *logo;
-  dumbp = al_start_duh(beyondfo, 2, 0, 1.0f, 4096, 4410);
+  dumbp = al_start_duh(beyondfo, 2, 0, 1.0f, 8192, 4800);
   logo = load_bitmap("../media/logo86.bmp", NULL);
   blit(logo, screen, 0, 0, 0, 0, 800, 600);
-  install_int_ex(this_is_temporary, BPS_TO_TIMER(2));
-  sleep(3000);
-  al_stop_duh(dumbp);
+  al_poll_duh(dumbp);
+  sleep(750);
+  al_poll_duh(dumbp);
+  sleep(750);
+  al_poll_duh(dumbp);
+  sleep(750);
+  al_poll_duh(dumbp);
+  sleep(750);
+  al_poll_duh(dumbp);
 }
 
 int menu()
 {
-  BITMAP *logo, *buffer;
+  BITMAP *logo, *buffer, *buttons[6];
+  int i, done;
   logo = load_bitmap("../media/teampink.bmp", NULL);
   buffer = create_bitmap(SCREEN_W, SCREEN_H);
-  int done = 0;
+  buttons[0] = load_bitmap("../media/buttons/about.bmp", NULL);
+  buttons[1] = load_bitmap("../media/buttons/back.bmp", NULL);
+  buttons[2] = load_bitmap("../media/buttons/help.bmp", NULL);
+  buttons[3] = load_bitmap("../media/buttons/ok.bmp", NULL);
+  buttons[4] = load_bitmap("../media/buttons/play.bmp", NULL);
+  buttons[5] = load_bitmap("../media/buttons/exit.bmp", NULL);
+  //tins = load_bitmap("../media/tins.bmp", NULL);
+  done = 0;
+  al_poll_duh(dumbp);
   while(!done)
   {
     while(game_time > 0)
     {
       // logic
-      if(keypressed())
+      if(key[KEY_ESC])
         return -1; // exit
+      if(mouse_b & 1) // click
+      {
+        if((mouse_x > ((SCREEN_W / 2) - 60)) && (mouse_x < ((SCREEN_W / 2) + 60))) // its in the x range
+        {
+          // find which button its on.
+          if(mouse_y > 220 && mouse_y < 260)
+            return 0; // play
+          if(mouse_y > 280 && mouse_y < 320)
+            return 2; // about
+          if(mouse_y > 340 && mouse_y < 380)
+            return 1; // help
+          if(mouse_y > 400 && mouse_y < 440)
+            return -1; // exit
+        }
+        al_poll_duh(dumbp);
+      }
       --game_time;
     }
     while(game_time < 0); // let it catch up
     clear_bitmap(buffer);
     masked_blit(logo, buffer, 0, 0, (SCREEN_W / 2) - (logo->w / 2), 0, logo->w, logo->h);
     textprintf_right_ex(buffer, font, SCREEN_W, 0, makecol(255,255,255), makecol(0,0,0), "FPS: %d", fps);
-    alfont_textout_centre_aa_ex(buffer, tfont, "Welcome to... gamename!", SCREEN_W / 2, logo->h, makecol(128, 255, 128), -1);
+    alfont_textout_centre_aa_ex(buffer, tfont, "Welcome to. . . gamename!", SCREEN_W / 2, logo->h, makecol(128, 255, 128), -1);
+    //masked_blit(tins, buffer, 0, 0, ((SCREEN_W / 2) - (tins->w / 2)), logo->h + alfont_text_height(tfont), tins->w, tins->h);
+    alfont_textout_centre_aa_ex(buffer, tfont, "A Joint Production by BAF, Gnat, and Sevalecan", SCREEN_W / 2, logo->h + alfont_text_height(tfont), makecol(128, 255, 128), -1);
+    /*draw_sine(100, buffer, 0, 0, SCREEN_W, SCREEN_H, makecol(255,128,0)); // <-- ignore these tests
     draw_sine(100, buffer, 0, 0, SCREEN_W, SCREEN_H, makecol(255,128,0));
     draw_sine(100, buffer, 0, 0, SCREEN_W, SCREEN_H, makecol(255,128,0));
     draw_sine(100, buffer, 0, 0, SCREEN_W, SCREEN_H, makecol(255,128,0));
     draw_sine(100, buffer, 0, 0, SCREEN_W, SCREEN_H, makecol(255,128,0));
     draw_sine(100, buffer, 0, 0, SCREEN_W, SCREEN_H, makecol(255,128,0));
     draw_sine(100, buffer, 0, 0, SCREEN_W, SCREEN_H, makecol(255,128,0));
-    draw_sine(100, buffer, 0, 0, SCREEN_W, SCREEN_H, makecol(255,128,0));
-    draw_sine(100, buffer, 0, 0, SCREEN_W, SCREEN_H, makecol(255,128,0));
+    draw_sine(100, buffer, 0, 0, SCREEN_W, SCREEN_H, makecol(255,128,0));*/
+    // draw the menu.
+    blit(buttons[4], buffer, 0, 0, ((SCREEN_W / 2) - (buttons[4]->w / 2)), 220, buttons[4]->w, buttons[4]->h);
+    blit(buttons[0], buffer, 0, 0, ((SCREEN_W / 2) - (buttons[0]->w / 2)), 280, buttons[0]->w, buttons[0]->h);
+    blit(buttons[2], buffer, 0, 0, ((SCREEN_W / 2) - (buttons[2]->w / 2)), 340, buttons[2]->w, buttons[2]->h);
+    blit(buttons[5], buffer, 0, 0, ((SCREEN_W / 2) - (buttons[5]->w / 2)), 400, buttons[5]->w, buttons[5]->h);
     masked_blit(mouse_sprite, buffer, 0, 0, mouse_x, mouse_y, mouse_sprite->w, mouse_sprite->h);
     blit(buffer, screen, 0, 0, 0, 0, SCREEN_W, SCREEN_H);
     ++cfps;
   }
   destroy_bitmap(buffer);
+  destroy_bitmap(logo);
+  for(i = 0; i < 6; ++i)
+    destroy_bitmap(buttons[i]);
 }
 
 void game()
@@ -168,6 +208,7 @@ int main(int argc, char *argv[])
         break;
     }
   }
+  al_stop_duh(dumbp);
   deinit();
 }
 END_OF_MAIN()

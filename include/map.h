@@ -7,7 +7,7 @@
 #ifndef MAP_H
 #define MAP_H
 
-#include <anim.h>
+#include "anim.h"
 
 typedef struct actor 
 {
@@ -37,7 +37,7 @@ typedef struct layer
 
 typedef struct map
 {
-  int w, h, layers;
+  int w, h, num_layers;
   layer *layers;
 } map;
 

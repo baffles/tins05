@@ -20,8 +20,8 @@ int main()
   BITMAP *tmp; FILE *hmm;
   logfile = fopen("./abitmap_util.log", "w");
   printf("Hey. This is ABITMAP Utility coming at you live from stdout!\n");
-  printf("Please choose:\n L) Load and view an abitmap\n C) Create an abitmap\n");
-  while(tolower(c) != 'l' && tolower(c) != 'c')
+  printf("Please choose:\n L) Load and view an abitmap\n C) Create an abitmap\n E) Edit an abitmap\n");
+  while(tolower(c) != 'l' && tolower(c) != 'c' && tolower(c) != 'e')
   {
     printf("->");
     scanf("%c", &c);
@@ -70,6 +70,25 @@ int main()
       blit(buffer, screen, 0, 0, 0, 0, SCREEN_W, SCREEN_H);
       //sleep(60 / cur->fps + 10);
     }
+  }
+  else if(tolower(c) == 'e')
+  {
+    int done = 0;
+    printf("Enter filename to edit -> ");
+    scanf("%s", filename);
+    printf("\n");
+    install_allegro(SYSTEM_NONE, &errno, atexit);
+    set_color_depth(32);
+    cur = load_abitmap(filename);
+    if(!cur) return -1;
+    printf("Loaded %s\n", filename);
+    printf("Settings:\n\tFPS: %d\n\tMasked: %d\n", cur->fps, cur->masked);
+    printf("New FPS -> ");
+    scanf("%d", &cur->fps);
+    printf("New Masked -> ");
+    scanf("%d", &cur->masked);
+    save_abitmap(filename, cur);
+    printf("Modified");
   }
   else
   {
