@@ -52,11 +52,14 @@ map *load_map(const char *filename)
   l = pack_igetl(file);
   h = pack_igetl(file);
   w = pack_igetl(file);
+  
+  if (strlen(a_file)) _actors = load_actors(a_file);
+  if (strlen(t_file)) _tiles = load_tiles(t_file);
+  ret = create_map(l, w, h);
+  
   strcpy(ret->actor_file, a_file);
   strcpy(ret->tile_file, t_file);
-  _actors = load_actors(a_file);
-  _tiles = load_tiles(t_file);
-  ret = create_map(l, w, h);
+  
   ret->w = w;
   ret->h = h;
   ret->num_layers = l;
@@ -108,7 +111,10 @@ int save_map(map *ret, const char *filename)
         pack_iputl(ret->layers[z].data[y][x].flags, file);
         pack_iputw(ret->layers[z].data[y][x].trans, file);
         pack_iputw(ret->layers[z].data[y][x].blocking, file);
-        pack_iputl(ret->layers[z].data[y][x].act->parent->id, file);
+        if (ret->layers[z].data[y][x].act) {
+            pack_iputl(ret->layers[z].data[y][x].act->parent->id, file);
+        }
+        else pack_iputl(-1, file);    
       }
     }
     file = pack_fclose_chunk(file);
