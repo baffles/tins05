@@ -12,7 +12,7 @@
 typedef struct actor 
 {
     ABITMAP *anim;
-    int maxhealth, maxammo, toughness, aggressiveness, etc;
+    int maxhealth, maxammo, toughness, aggressiveness;
 } actor;
 
 typedef struct actor_instance
