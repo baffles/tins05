@@ -7,6 +7,8 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include <anim.h>
+
 typedef struct actor 
 {
     ABITMAP *anim;
