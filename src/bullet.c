@@ -25,7 +25,7 @@ int update_bullet(bullet *blt, map *cmap) {
     blt->rad+=2;
     blt->c++;
     blt->t = (blt->f*blt->rad)/blt->tr;
-    blt->t = blt->f/t;
+    blt->t = blt->f/blt->t;
     blt->i = cos(blt->c) * blt->t;
     blt->kunt = sin(blt->c) * blt->t;
     
@@ -49,8 +49,8 @@ int update_bullet(bullet *blt, map *cmap) {
     }       
     
     if (cmap->layers[z].data[y][x].act) {
-        cmap->layers[z].data[y][x].act.health -= 10;
-        if (cmap->layers[z].data[y][x].act.health < 1) {
+        cmap->layers[z].data[y][x].act->health -= 10;
+        if (cmap->layers[z].data[y][x].act->health < 1) {
             destroy_actor_instance(cmap->layers[z].data[y][x].act);
             cmap->layers[z].data[y][x].act = NULL;
         }   
