@@ -592,7 +592,7 @@ int e_flg_proc(int msg, DIALOG *d, int c) {
                 //sprintf(d->dp, "%d", insdata.cf->flags);
                 memset(d->dp, 0, 10);
                 for (x=0;x<8;x++) {
-                    ((char *)d->dp)[x] = ((insdata.cf->flags & (0x1 << 7-x)) >> x) ? '1' : '0';
+                    ((char *)d->dp)[x] = (insdata.cf->flags & (0x1 << (7-x))) ? '1' : '0';
                 }    
                 d_edit_proc(MSG_DRAW, d, c);
             }
@@ -689,7 +689,7 @@ int file_save()
     
     ret = file_select_ex("Save a Map file.", path, NULL, 1023, 0, 0);
     if (ret == 0) return D_O_K;
-    
+    strcpy(insdata.mdata->actor_file, "..\\media\\tileset.tls");
     save_map(insdata.mdata, path);
     
     return D_O_K;
