@@ -194,6 +194,7 @@ void game()
       // logic
       if(key[KEY_ESC])
         done = 1;
+      
       if(key[KEY_LEFT] && x > 0)
       {
         --x;
@@ -218,6 +219,27 @@ void game()
         direction = itofix(128);
         moving = 1;
       }
+      if(moving)
+      {
+        // kinda redundant, but check for diaganols and display it correctly
+        if(key[KEY_UP] && key[KEY_LEFT])
+        {
+          direction = itofix(224);
+        }
+        if(key[KEY_UP] && key[KEY_RIGHT])
+        {
+          direction = itofix(32);
+        }
+        if(key[KEY_DOWN] && key[KEY_LEFT])
+        {
+          direction = itofix(160);
+        }
+        if(key[KEY_DOWN] && key[KEY_RIGHT])
+        {
+          direction = itofix(96);
+        }
+      }
+      
       if(moving)
         update_animation(char_ins);
       moving = 0;
