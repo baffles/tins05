@@ -115,6 +115,7 @@ int eproc_fini()
 }
 
 int e_load_tiles(char *filename) {
+    /*
     int g, h;
     
     if (insdata.flags & F_TILES_LOADED) e_clear_tiles();
@@ -139,13 +140,33 @@ int e_load_tiles(char *filename) {
         insdata.flags |= F_TILES_LOADED;
     }    
     
+    */
+    int g, h;
+    
+    insdata.tlr = load_tiles(filename);
+    if (insdata.tlr == NULL) return -1;
+    
+    insdata.flags |= F_TILES_LOADED;
+    
+    for (g=0;insdata.tlr[g].bmp == NULL;g++);
+    
+    insdata.psd = malloc(sizeof(BITMAP *)*g);
+    
+    for (h=0;h<g;h++) {
+        insdata.psd[h] = insdata.tlr[h].bmp;
+    }
+        
+    
     return 0;
 }    
 
 int e_clear_tiles() {
     if (insdata.flags & F_TILES_LOADED) {
+        /*
         free(insdata.psd);
         unload_datafile(insdata.tls);
+        */
+        destroy_tiles(insdata.tlr);
         insdata.tiles = 0;
         insdata.psd = NULL;
         insdata.tls = NULL;
@@ -593,7 +614,7 @@ int e_trn_proc(int msg, DIALOG *d, int c) {
             insdata.cf->trans = atoi(d->dp);
             break;
         case MSG_IDLE:
-            if (!(d->flags & D_SELECTED)) {
+            if (!(d->flags & D_GOTFOCUS)) {
                 sprintf(d->dp, "%d", insdata.cf->trans);
                 d_edit_proc(MSG_DRAW, d, c);
             }    
@@ -615,7 +636,7 @@ int e_blk_proc(int msg, DIALOG *d, int c) {
             insdata.cf->blocking = atoi(d->dp);
             break;
         case MSG_IDLE:
-            if (!(d->flags & D_SELECTED)) {
+            if (!(d->flags & D_GOTFOCUS)) {
                 sprintf(d->dp, "%d", insdata.cf->blocking);
                 d_edit_proc(MSG_DRAW, d, c);
             }    

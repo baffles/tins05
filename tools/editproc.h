@@ -61,6 +61,7 @@ typedef struct edit_data {
     char trd[10];
     char bkl[10];
     int tiles;
+    tile *tlr;
     DATAFILE *tls;
     BITMAP **psd;
     map *mdata;
