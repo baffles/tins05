@@ -14,7 +14,7 @@ typedef struct ABITMAP
 {
   int num_frames, fps, w, h;
   BITMAP **frames;
-} ABITMAP:
+} ABITMAP;
 
 typedef struct ABITMAP_INSTANCE
 {

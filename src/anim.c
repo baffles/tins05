@@ -105,6 +105,9 @@ void update_animation(ABITMAP_INSTANCE *bmp)
   if(bmp->curframe > bmp->parent->num_frames)
     bmp->curframe = 0;
   
+  // update. the curframe.
+  
+  
   // keep it from overflowing
   if(anim_counter == 61)
     anim_counter = 1;
