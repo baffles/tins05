@@ -15,6 +15,10 @@ int e_lw_proc(int msg, DIALOG *d, int c);
 int e_ur_proc(int msg, DIALOG *d, int c);
 int e_damnit_proc(int msg, DIALOG *d, int c);
 int e_sbutton_proc(int msg, DIALOG *d, int c);
+int e_scrupm_proc(int msg, DIALOG *d, int c);
+int e_scrdwnm_proc(int msg, DIALOG *d, int c);
+int e_scrlftm_proc(int msg, DIALOG *d, int c);
+int e_scrrhtm_proc(int msg, DIALOG *d, int c);
 
 int file_new();
 int file_open();
@@ -41,6 +45,9 @@ typedef struct edit_data {
     DATAFILE *tls;
     BITMAP **psd;
     map *mdata;
+    // current state shit
+    int x,y;
+    
 } edit_data;    
 
 #ifndef EDITPROC_C

@@ -42,6 +42,10 @@ DIALOG md[] = {
     { e_ur_proc, 3+40, 25, 40, 13, 0x0, 0xa0a0a0, 0, 0, 0, 0, "Up", NULL, NULL },
     { d_text_proc, 3, 38, 80, 13, 0x0, 0xC0C0C0, 0, 0, 0, 0, "Current Layer", NULL, NULL },
     { e_damnit_proc, 4, 51,  498, 498, 0x000000, 0xA0A0A0, 0, 0, 0, 0, NULL, NULL, NULL },
+    { e_scrupm_proc, 4+498, 51, 30, 244, 0x0, 0xa0a0a0, 0, 0, 0, 0, "Up", NULL, NULL },
+    { e_scrdwnm_proc, 4+498, 51+244, 30, 244, 0x0, 0xa0a0a0, 0, 0, 0, 0, "Dwn", NULL, NULL },
+    { e_scrlftm_proc, 4, 51+498, 244, 30, 0x0, 0xa0a0a0, 0, 0, 0, 0, "Left", NULL, NULL },
+    { e_scrrhtm_proc, 4+244, 51+498, 244, 30, 0x0, 0xa0a0a0, 0, 0, 0, 0, "Right", NULL, NULL },
     //{ d_ctext_proc, 3+250, 50+250, 0, 0, 0x000000, 0xA0A0A0, 0, 0, 0, 0, "-=Workspace=-", NULL, NULL },
     { NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 };
@@ -74,6 +78,7 @@ int eproc_init()
     insdata.flags = 0;
     insdata.eda = NULL;
     insdata.tls = NULL;
+    insdata.x = insdata.y = 0;
     strcpy(insdata.ltex, "0");
     
     return 0;
@@ -205,6 +210,7 @@ int e_damnit_proc(int msg, DIALOG *d, int c) {
         case MSG_START:
             d->dp = create_bitmap(d->w, d->h);
             d->d1 = d->d2 = 0;
+            insdata.x = insdata.y = 0;
             break;
             e_damnit_proc(MSG_DRAW, d, c);
         case MSG_END:
@@ -213,8 +219,8 @@ int e_damnit_proc(int msg, DIALOG *d, int c) {
         case MSG_DRAW:
             clear_bitmap(d->dp);
             if (insdata.mdata != NULL && (insdata.flags & F_TILES_LOADED)) {
-                for (y=d->d1;y<insdata.mdata->h && y<(d->h/40);y++) {
-                    for (x=d->d2;x<insdata.mdata->w && x<(d->w/40);x++) {
+                for (y=insdata.y;y<insdata.mdata->h && y<(d->h/40);y++) {
+                    for (x=insdata.x;x<insdata.mdata->w && x<(d->w/40);x++) {
                         if (insdata.mdata->layers[insdata.curlayer].data[y][x].tile >= insdata.tiles) {
                             blit(insdata.eda[0].dat, d->dp, 0, 0, (40*x), (40*y), 40, 40);
                         }
@@ -263,6 +269,81 @@ int e_sbutton_proc(int msg, DIALOG *d, int c) {
     return ret;
 }    
 
+int e_scrupm_proc(int msg, DIALOG *d, int c)
+{
+    d_button_proc(msg, d, c);
+    switch(msg) {
+        case MSG_CLICK:
+            if (insdata.y > 0) {
+                 insdata.y -= 5;
+            }
+            if (insdata.y < 0) insdata.y = 0;
+            d->flags &= ~D_SELECTED;
+            while (mouse_b & 2);
+            d_button_proc(MSG_DRAW, d, c);    
+            break;
+        default:
+            break;
+    }    
+    return D_O_K;
+}
+    
+int e_scrdwnm_proc(int msg, DIALOG *d, int c)
+{
+    d_button_proc(msg, d, c);
+    switch(msg) {
+        case MSG_CLICK:
+            if (insdata.y < 10000) {
+                 insdata.y += 5;
+            }
+            d->flags &= ~D_SELECTED;
+            while (mouse_b & 2);
+            d_button_proc(MSG_DRAW, d, c);    
+            break;
+        default:
+            break;
+    }    
+    return D_O_K;
+}
+    
+
+
+int e_scrlftm_proc(int msg, DIALOG *d, int c)
+{
+    d_button_proc(msg, d, c);
+    switch(msg) {
+        case MSG_CLICK:
+            if (insdata.x > 0) {
+                 insdata.x -= 5;
+            }
+            if (insdata.x < 0) insdata.y = 0;
+            d->flags &= ~D_SELECTED;
+            while (mouse_b & 2);
+            d_button_proc(MSG_DRAW, d, c);    
+            break;
+        default:
+            break;
+    }    
+    return D_O_K;
+}
+    
+int e_scrrhtm_proc(int msg, DIALOG *d, int c)
+{
+    d_button_proc(msg, d, c);
+    switch(msg) {
+        case MSG_CLICK:
+            if (insdata.x < 10000) {
+                 insdata.x += 5;
+            }
+            d->flags &= ~D_SELECTED;
+            while (mouse_b & 2);
+            d_button_proc(MSG_DRAW, d, c);    
+            break;
+        default:
+            break;
+    }    
+    return D_O_K;
+}
 
       
 
