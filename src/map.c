@@ -11,21 +11,21 @@ map *create_map(int layers, int w, int h)
   map *ret;
   int x, y, z;
   ret = (map *)malloc(sizeof(map));
-  map->w = w;
-  map->h = h;
-  map->num_layers = layers;
-  map->layers = (layer *)malloc(sizeof(layer) * layers);
+  ret->w = w;
+  ret->h = h;
+  ret->num_layers = layers;
+  ret->layers = (layer *)malloc(sizeof(layer) * layers);
   for(z = 0; z < layers; ++z)
   {
-    map->layers[z]->flags = 0;
-    map->layers[z]->data = (cell **)malloc(sizeof(cell *) * h);
+    ret->layers[z].flags = 0;
+    ret->layers[z].data = (cell **)malloc(sizeof(cell *) * h);
     for(y = 0; y < h; ++y)
     {
-      map->layers[z]->data[y] = (cell *)malloc(sizeof(cell) * w);
+      ret->layers[z].data[y] = (cell *)malloc(sizeof(cell) * w);
       for(x = 0; x < w; ++x)
       {
-        map->layers[z]->data[y][x]->tile = map->layers[z]->data[y][x]->flags = map->layers[z]->data[y][x]->trans = map->layers[z]->data[y][x]->blocking = 0;
-        map->layers[z]->data[y][x]->act = NULL;
+        ret->layers[z].data[y][x].tile = ret->layers[z].data[y][x].flags = ret->layers[z].data[y][x].trans = ret->layers[z].data[y][x].blocking = 0;
+        ret->layers[z].data[y][x].act = NULL;
       }
     }
   }
@@ -52,16 +52,16 @@ map *load_map(const char *filename)
   for(z = 0; z < l; ++z)
   {
     file = pack_fopen_chunk(file, 1);
-    ret->layers[z]->flags = pack_igetl(file);
+    ret->layers[z].flags = pack_igetl(file);
     for(y = 0; y < h; ++y)
     {
       for(x = 0; x < w; ++x)
       {
-        ret->layers[z]->data[y][x]->tile = pack_igetl(file);
-        ret->layers[z]->data[y][x]->flags = pack_igetl(file);
-        ret->layers[z]->data[y][x]->trans = pack_igetw(file);
-        ret->layers[z]->data[y][x]->blocking = pack_igetw(file);
-        ret->layers[z]->data[y][x]->act = get_actor_instance(_actors[pack_igetl(file)]);
+        ret->layers[z].data[y][x].tile = pack_igetl(file);
+        ret->layers[z].data[y][x].flags = pack_igetl(file);
+        ret->layers[z].data[y][x].trans = pack_igetw(file);
+        ret->layers[z].data[y][x].blocking = pack_igetw(file);
+        ret->layers[z].data[y][x].act = get_actor_instance(_actors[pack_igetl(file)]);
       }
     }
     file = pack_fclose_chunk(file);
@@ -70,31 +70,31 @@ map *load_map(const char *filename)
   return ret;
 }
 
-int save_map(map *map, const char *filename)
+int save_map(map *ret, const char *filename)
 {
   PACKFILE *file;
   int x, y, z;
   file = pack_fopen(filename, "w");
   if(!file)
     return -1;
-  pack_iputl(strlen(map->actor_file), file);
-  pack_fwrite(map->actor_file, strlen(map->actor_file), file);
-  pack_iputl(map->num_layers, file);
-  pack_iputl(map->h, file);
-  pack_iputl(map->w, file);
-  for(z = 0; z < map->num_layers; ++z)
+  pack_iputl(strlen(ret->actor_file), file);
+  pack_fwrite(ret->actor_file, strlen(ret->actor_file), file);
+  pack_iputl(ret->num_layers, file);
+  pack_iputl(ret->h, file);
+  pack_iputl(ret->w, file);
+  for(z = 0; z < ret->num_layers; ++z)
   {
     file = pack_fopen_chunk(file, 1);
-    pack_iputl(map->layers[z]->flags, file);
-    for(y = 0; y < map->h; ++y)
+    pack_iputl(ret->layers[z].flags, file);
+    for(y = 0; y < ret->h; ++y)
     {
-      for(x = 0; x < map->w; ++x)
+      for(x = 0; x < ret->w; ++x)
       {
-        pack_iputl(map->layers[z]->data[y][x]->tile, file);
-        pack_iputl(map->layers[z]->data[y][x]->flags, file);
-        pack_iputw(map->layers[z]->data[y][x]->trans, file);
-        pack_iputw(map->layers[z]->data[y][x]->blocking, file);
-        pack_iputl(map->layers[z]->data[y][z]->act->id, file);
+        pack_iputl(ret->layers[z].data[y][x].tile, file);
+        pack_iputl(ret->layers[z].data[y][x].flags, file);
+        pack_iputw(ret->layers[z].data[y][x].trans, file);
+        pack_iputw(ret->layers[z].data[y][x].blocking, file);
+        pack_iputl(ret->layers[z].data[y][z].act->id, file);
       }
     }
     file = pack_fclose_chunk(file);
@@ -103,25 +103,25 @@ int save_map(map *map, const char *filename)
   return 0;
 }
 
-void destroy_map(map *map)
+void destroy_map(map *ret)
 {
   int x, y, z;
-  for(z = 0; z < map->num_layers; ++z)
+  for(z = 0; z < ret->num_layers; ++z)
   {
-    for(y = 0; y < map->num_layers; ++y)
+    for(y = 0; y < ret->num_layers; ++y)
     {
-      for(x = 0; x < map->num_layers; ++x)
+      for(x = 0; x < ret->num_layers; ++x)
       {
-        destroy_actor_instance(map->layers[z]->data[y][x]->act);
-        free(map->layers[z]->data[y][x]);
+        destroy_actor_instance(ret->layers[z].data[y][x].act);
+        free(ret->layers[z].data[y][x]);
       }
-      free(map->layers[z]->data[y]);
+      free(ret->layers[z].data[y]);
     }
-    free(map->layers[z]->data);
-    free(map->layers[z]);
+    free(ret->layers[z].data);
+    free(ret->layers[z]);
   }
-  free(map->layers);
-  free(map);
+  free(ret->layers);
+  free(ret);
   
   destroy_actors(_actors);
 }
