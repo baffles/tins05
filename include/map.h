@@ -13,6 +13,14 @@
 #include "tiles.h"
 #include "actor.h"
 
+// flags
+#define EXIT    2
+#define HEALTH  4
+#define AMMO    8
+#define ARMOR   16
+#define PIT     (EXIT | HEALTH)
+#define WALKWAY (EXIT | AMMO)
+
 typedef struct cell
 {
   int tile, flags;
