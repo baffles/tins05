@@ -572,11 +572,11 @@ void game()
     clear_bitmap(buffer);
     for(z = 0; z < mp->num_layers; ++z)
     {
-      for(y = 0; y < mp->h; ++y)
+      for(y = 0; y < mp->h && y * 40 < SCREEN_H; ++y)
       {
-        for(x = 0; x < mp->w; ++x)
+        for(x = 0; x < mp->w && x * 40 < SCREEN_W; ++x)
         {
-          if(mp->layers[z].data[y][x].trans)
+          if(mp->layers[z].data[y][x].trans || _tiles[mp->layers[z].data[y][x].tile].masked)
             masked_blit(_tiles[mp->layers[z].data[y][x].tile].bmp, buffer, 0, 0, x * 40, y * 40, 40, 40);
           else
             blit(_tiles[mp->layers[z].data[y][x].tile].bmp, buffer, 0, 0, x * 40, y * 40, 40, 40);
@@ -592,6 +592,7 @@ void game()
   }
   destroy_abitmap_instance(char_ins);
   destroy_abitmap(character);
+  destroy_map(mp);
   //sleep(100);
 }
 

@@ -158,4 +158,5 @@ void destroy_map(map *ret)
   free(ret);
   
   destroy_actors(_actors);
+  destroy_tiles(_tiles);
 }
