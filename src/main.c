@@ -47,8 +47,17 @@ int init()
   BASSERT(install_timers());
 }
 
+void deinit()
+{
+  if(logfile)
+    fclose(logfile);
+  logfile = NULL;
+}
+
 int main(int argc, char *argv[])
 {
   init();
+  //game();
+  deinit();
 }
 END_OF_MAIN()
