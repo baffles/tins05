@@ -75,6 +75,7 @@ int save_actors(actor **actors, const char *filename)
 void destroy_actors(actor **a)
 {
   int i, tot = 0;
+  if (!a) return;
   while(1)
   {
     if(a[tot])
@@ -103,6 +104,7 @@ actor_instance *get_actor_instance(actor *a)
 
 void destroy_actor_instance(actor_instance *a)
 {
+  if (!a) return;
   a->parent = NULL;
   destroy_abitmap_instance(a->anim);
   free(a);
