@@ -51,7 +51,7 @@ tile *load_tiles(const char *filename)
   }
   ret[ta * td].bmp = NULL;
   pack_fclose(file);
-  destroy_bitmap(src);
+  //destroy_bitmap(src);
   return ret;
 }
 
