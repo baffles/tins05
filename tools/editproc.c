@@ -48,7 +48,17 @@ DIALOG md[] = {
     { e_scrdwnm_proc, 502, 300, 30, 249, 0x0, 0xFF9A00, 0, 0, 0, 0, "Dwn", NULL, NULL },
     { e_scrlftm_proc, 4, 549, 249, 30, 0x0, 0xFF9A00, 0, 0, 0, 0, "Left", NULL, NULL },
     { e_scrrhtm_proc, 253, 549, 249, 30, 0x0, 0xFF9A00, 0, 0, 0, 0, "Right", NULL, NULL },
-    { e_tdisp_proc, 540, 51, 40, 498, 0x0, 0xFF9A00, 0, 0, 0, 0, NULL, NULL, NULL },
+    { e_tdisp_proc, 540, 66, 40, 468, 0x0, 0xFF9A00, 0, 0, 0, 0, NULL, NULL, NULL },
+    { e_tdup_proc, 540, 51, 40, 15, 0x0, 0xFF9A00, 0, 0, 0, 0, "Up", NULL, NULL },
+    { e_tddwn_proc, 540, 534, 40, 15, 0x0, 0xFF9A00, 0, 0, 0, 0, "Down", NULL, NULL },
+    { e_cmtog_proc, 502, 51+498, 30, 30, 0x0, 0xFF9A00, 0, 0, 0, 0, "CTG", NULL, NULL },
+    //{ e_tle_proc, 580, 51, 40, 10, 0x0, 0xFFFFFF, 0, 0, 13, 0, insdata.tilt, NULL, NULL },
+    { d_ctext_proc, 583, 51, 90, 10, 0x0, 0xc0c0c0, 0, 0, 0, 0, "Flags", NULL, NULL },
+    { e_flg_proc, 583, 61, 90, 10, 0x0, 0xFFFFFF, 0, 0, 8, 0, insdata.tilt, NULL, NULL },
+    { d_ctext_proc, 583, 71, 90, 10, 0x0, 0xc0c0c0, 0, 0, 0, 0, "Blocking", NULL, NULL },
+    { e_blk_proc, 583, 81, 90, 10, 0x0, 0xFFFFFF, 0, 0, 8, 0, insdata.bkl, NULL, NULL },
+    { d_ctext_proc, 583, 91, 90, 10, 0x0, 0xc0c0c0, 0, 0, 0, 0, "Trans", NULL, NULL },
+    { e_trn_proc, 583, 101, 90, 10, 0x0, 0xFFFFFF, 0, 0, 8, 0, insdata.trd, NULL, NULL },
     //{ d_ctext_proc, 3+250, 50+250, 0, 0, 0x000000, 0xA0A0A0, 0, 0, 0, 0, "-=Workspace=-", NULL, NULL },
     { NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 };
@@ -84,6 +94,11 @@ int eproc_init()
     insdata.x = insdata.y = 0;
     insdata.selx = insdata.sely = 0;
     insdata.tdisp.scroll = insdata.tdisp.sel = 0;
+    
+    memset(&insdata.cll, 0, sizeof(cell));
+    memset(insdata.tilt, 0, 20);
+    insdata.cf = &insdata.cll;
+    insdata.cflag = C_SET;
     
     strcpy(insdata.ltex, "0");
     strcpy(insdata.ltot, "0");
@@ -267,6 +282,8 @@ int e_map_proc(int msg, DIALOG *d, int c) {
             
             
             break;
+        case MSG_CHAR:
+        case MSG_KEY:
         case MSG_CLICK:
             if (mouse_needs_poll()) {
                 poll_mouse();
@@ -277,6 +294,12 @@ int e_map_proc(int msg, DIALOG *d, int c) {
             if (y+insdata.y >= insdata.mdata->h) y = insdata.mdata->h-1;
             insdata.selx = x+insdata.x;
             insdata.sely = y+insdata.y;
+            
+            if (insdata.cflag == C_SET)
+                insdata.cf = &(insdata.mdata->layers[insdata.curlayer].data[insdata.sely][insdata.selx]);
+            if (insdata.cf == NULL)
+                insdata.cf = &insdata.cll;
+            insdata.tdisp.sel = insdata.cf->tile;
             break;    
         default:
             break;
@@ -413,7 +436,7 @@ int e_tdisp_proc(int msg, DIALOG *d, int c) {
                 }
                 
                 for (x=insdata.tdisp.scroll;(x-insdata.tdisp.scroll)<(d->h/40)+1 && x < insdata.tiles;x++) {
-                    blit(insdata.psd[x], d->dp, 0, 0, 0, x*40, 40, 40);
+                    blit(insdata.psd[x], d->dp, 0, 0, 0, (x-insdata.tdisp.scroll)*40, 40, 40);
                     if (insdata.tdisp.sel == x) {
                         rect(d->dp, 0, x*40, 39, x*40+39, makecol(0,255,0));
                     }    
@@ -429,6 +452,8 @@ int e_tdisp_proc(int msg, DIALOG *d, int c) {
             
             if (x+insdata.tdisp.scroll >= insdata.tiles) x = insdata.tiles-1;
             insdata.tdisp.sel = x+insdata.tdisp.scroll;
+            
+                insdata.cf->tile = insdata.tdisp.sel;
             
             break;
         default:
@@ -461,7 +486,147 @@ int e_tlay_proc(int msg,  DIALOG *d, int c) {
     
     
     return ret;
-}          
+}
+
+
+int e_tdup_proc(int msg, DIALOG *d, int c) {
+    int ret;
+    
+    ret = d_button_proc(msg, d, c);
+    
+    switch(msg) {
+        case MSG_CLICK:
+            d->flags &= ~D_SELECTED;
+            d_button_proc(MSG_DRAW, d, c);
+            insdata.tdisp.scroll--;
+            if (insdata.tdisp.scroll < 0) insdata.tdisp.scroll = 0;
+        default:
+            break;
+    }    
+    
+    return ret;
+}
+    
+int e_tddwn_proc(int msg, DIALOG *d, int c) {
+    int ret;
+    
+    ret = d_button_proc(msg, d, c);
+    
+    switch(msg) {
+        case MSG_CLICK:
+            d->flags &= ~D_SELECTED;
+            d_button_proc(MSG_DRAW, d, c);
+            insdata.tdisp.scroll++;
+            if (insdata.tdisp.scroll >= insdata.tiles) insdata.tdisp.scroll = insdata.tiles-1;
+        default:
+            break;
+    }    
+    
+    return ret;
+}
+
+
+int e_cmtog_proc(int msg, DIALOG *d, int c) {
+    int ret;
+    
+    ret = d_button_proc(msg, d, c);
+    
+    switch (msg) {
+        case MSG_CLICK:
+            if (d->flags & D_SELECTED) {
+                insdata.cflag = C_HOLD;
+                memcpy(&insdata.cll, &(insdata.mdata->layers[insdata.curlayer].data[insdata.sely][insdata.selx]), sizeof(cell));
+                insdata.cf = &insdata.cll;
+            }    
+            else {
+                insdata.cf = &(insdata.mdata->layers[insdata.curlayer].data[insdata.sely][insdata.selx]);
+                insdata.cflag = C_SET;
+            }    
+            break;
+        default:
+            break;
+    }    
+    
+    return ret;
+}
+
+
+int e_flg_proc(int msg, DIALOG *d, int c) {
+    int ret, x, v;
+    
+    ret = d_edit_proc(msg, d, c);
+    
+    switch(msg) {
+        case MSG_LOSTFOCUS:
+            v = 0;
+            for (x=0;x<strlen(d->dp);x++) {
+                if (((char *)d->dp)[x] == '1') {
+                    v |= (0x1 << ((strlen(d->dp)-1)-x));
+                }    
+            }
+            insdata.cf->flags = v;    
+            break;
+        case MSG_IDLE:
+            if (!(d->flags & D_GOTFOCUS)) {
+                //sprintf(d->dp, "%d", insdata.cf->flags);
+                memset(d->dp, 0, 10);
+                for (x=0;x<8;x++) {
+                    ((char *)d->dp)[x] = ((insdata.cf->flags & (0x1 << 7-x)) >> x) ? '1' : '0';
+                }    
+                d_edit_proc(MSG_DRAW, d, c);
+            }
+            break;       
+        default:
+            break;
+    }    
+    
+    return ret;
+}
+    
+int e_trn_proc(int msg, DIALOG *d, int c) {
+    int ret;
+    
+    ret = d_edit_proc(msg, d, c);
+    
+    switch(msg) {
+        case MSG_LOSTFOCUS:
+            insdata.cf->trans = atoi(d->dp);
+            break;
+        case MSG_IDLE:
+            if (!(d->flags & D_SELECTED)) {
+                sprintf(d->dp, "%d", insdata.cf->trans);
+                d_edit_proc(MSG_DRAW, d, c);
+            }    
+            break;
+        default:
+            break;
+    }    
+    
+    return ret;
+}
+    
+int e_blk_proc(int msg, DIALOG *d, int c) {
+    int ret;
+    
+    ret = d_edit_proc(msg, d, c);
+    
+    switch(msg) {
+        case MSG_LOSTFOCUS:
+            insdata.cf->blocking = atoi(d->dp);
+            break;
+        case MSG_IDLE:
+            if (!(d->flags & D_SELECTED)) {
+                sprintf(d->dp, "%d", insdata.cf->blocking);
+                d_edit_proc(MSG_DRAW, d, c);
+            }    
+            break;
+        default:
+            break;
+    }    
+    
+    return ret;
+}    
+                    
 
 
 int file_new()

@@ -38,7 +38,7 @@ map *load_map(const char *filename)
 {
   map *ret;
   PACKFILE *file;
-  int w, h, l, x, y, z, len, tw, th;
+  int w, h, l, x, y, z, len, tw, th, sev;
   float f_ver;
   char a_file[512], t_file[512];
   file = pack_fopen(filename, "r");
@@ -75,7 +75,18 @@ map *load_map(const char *filename)
         ret->layers[z].data[y][x].flags = pack_igetl(file);
         ret->layers[z].data[y][x].trans = pack_igetw(file);
         ret->layers[z].data[y][x].blocking = pack_igetw(file);
-        ret->layers[z].data[y][x].act = get_actor_instance(_actors[pack_igetl(file)]);
+        /* Baf... STOP ASSUMING THERE IS ALWAYS AN ACTOR... GRAWR... NO NO NO NO NO NO NO NO.. regardless
+         * Even if there WERE a loaded actor FILE. wich there is not ATM, it would not neccesarily have
+         * an actor ID at that point, so if sev is 0 then it just says fuckit. change what you want
+         */
+         
+        //ret->layers[z].data[y][x].act = get_actor_instance(_actors[pack_igetl(file)]);
+        
+        sev = pack_igetl(file);
+        if (sev && _actors) {
+            ret->layers[z].data[y][x].act = get_actor_instance(_actors[sev]);
+        }
+         
       }
     }
     file = pack_fclose_chunk(file);

@@ -21,6 +21,12 @@ int e_scrlftm_proc(int msg, DIALOG *d, int c);
 int e_scrrhtm_proc(int msg, DIALOG *d, int c);
 int e_tdisp_proc(int msg, DIALOG *d, int c);
 int e_tlay_proc(int msg,  DIALOG *d, int c);
+int e_tdup_proc(int msg, DIALOG *d, int c);
+int e_tddwn_proc(int msg, DIALOG *d, int c);
+int e_cmtog_proc(int msg, DIALOG *d, int c);
+int e_flg_proc(int msg, DIALOG *d, int c);
+int e_trn_proc(int msg, DIALOG *d, int c);
+int e_blk_proc(int msg, DIALOG *d, int c);
 
 int file_new();
 int file_open();
@@ -36,6 +42,8 @@ int edit_redo();
 
 #define F_TILES_LOADED 0x1
 #define F_MAP_OPENED   0x2
+#define C_HOLD 0x1
+#define C_SET 0x2
 
 typedef struct tdisp_data {
     int scroll;
@@ -49,6 +57,9 @@ typedef struct edit_data {
     int curlayer;
     char ltex[15];
     char ltot[15];
+    char tilt[20];
+    char trd[10];
+    char bkl[10];
     int tiles;
     DATAFILE *tls;
     BITMAP **psd;
@@ -58,6 +69,10 @@ typedef struct edit_data {
     int selx, sely;
     
     tdisp_data tdisp;
+    
+    cell cll;
+    cell *cf;
+    int cflag;
     
 } edit_data;    
 
