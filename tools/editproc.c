@@ -40,6 +40,7 @@ DIALOG md[] = {
     { d_edit_proc, 3, 16, 80, 30, 0x0, 0x00FFFFFF, 0, 0, 0, 0, insdata.ltex, NULL, NULL },
     { e_lw_proc, 3, 25, 40, 13, 0x0, 0xa0a0a0, 0, 0, 0, 0, "Down", NULL, NULL },
     { e_ur_proc, 3+40, 25, 40, 13, 0x0, 0xa0a0a0, 0, 0, 0, 0, "Up", NULL, NULL },
+    { d_text_proc, 3, 38, 80, 13, 0x0, 0xC0C0C0, 0, 0, 0, 0, "Current Layer", NULL, NULL },
     { e_damnit_proc, 4, 51,  498, 498, 0x000000, 0xA0A0A0, 0, 0, 0, 0, NULL, NULL, NULL },
     //{ d_ctext_proc, 3+250, 50+250, 0, 0, 0x000000, 0xA0A0A0, 0, 0, 0, 0, "-=Workspace=-", NULL, NULL },
     { NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
@@ -80,6 +81,8 @@ int eproc_init()
 int eproc_fini()
 {
     unload_datafile(sf);
+    if (insdata.flags & F_TILES_LOADED) clear_tiles();
+    if (insdata.flags & F_MAP_OPENED) e_destroymap();
     return 0;
 }
 
@@ -200,6 +203,7 @@ int e_damnit_proc(int msg, DIALOG *d, int c) {
             d->dp = create_bitmap(d->w, d->h);
             d->d1 = d->d2 = 0;
             break;
+            e_damnit_proc(MSG_DRAW, d, c);
         case MSG_END:
             destroy_bitmap(d->dp);
             break;
@@ -209,14 +213,16 @@ int e_damnit_proc(int msg, DIALOG *d, int c) {
                 for (y=d->d1;y<insdata.mdata->h && y<(d->h/40);y++) {
                     for (x=d->d2;x<insdata.mdata->w && x<(d->w/40);x++) {
                         if (insdata.mdata->layers[insdata.curlayer].data[y][x].tile >= insdata.tiles) {
-                            blit(insdata.eda[0].dat, d->dp, 0, 0, 40, 40, (40*x), (40*y));
+                            blit(insdata.eda[0].dat, d->dp, 0, 0, (40*x), (40*y), 40, 40);
                         }
                         else {    
-                            blit(insdata.psd[insdata.mdata->layers[insdata.curlayer].data[y][x].tile], d->dp, 0, 0, 40, 40, (40*x), (40*y));
+                            blit(insdata.psd[insdata.mdata->layers[insdata.curlayer].data[y][x].tile], d->dp, 0, 0, (40*x), (40*y),  40, 40);
                         }    
                     }    
                 }    
             }
+            
+            if (!(insdata.flags & F_TILES_LOADED) || !insdata.mdata) rectfill(d->dp, 0, 0, d->w, d->h, 0xc0c0c0);
             
             if (!(insdata.flags & F_TILES_LOADED)) {
                 rectfill(d->dp, 0, 0, d->w, d->h, 0xc0c0c0);
@@ -224,11 +230,11 @@ int e_damnit_proc(int msg, DIALOG *d, int c) {
             }    
             
             if (!insdata.mdata) {
-                rectfill(d->dp, 0, 0, d->w, d->h, 0xc0c0c0);
+                //rectfill(d->dp, 0, 0, d->w, d->h, 0xc0c0c0);
                 textout_ex(d->dp, font, "No Map Loaded", 10, 20, 0x0, 0xc0c0c0);
             }   
             
-            blit(d->dp, gui_get_screen(), 0, 0, d->w, d->h, 0, 0);
+            blit(d->dp, gui_get_screen(), 0, 0, d->x, d->y, d->w, d->h);
             
             
             break;
@@ -267,6 +273,15 @@ int file_new()
     
 int file_open()
 {
+    int ret;
+    char path[1024];
+    memset(path, 0, 1024);
+    ret = file_select_ex("Load a Map file.", path, NULL, 1023, 0, 0);
+    if (ret != 0) return D_O_K;
+    if (insdata.flags & F_MAP_OPENED) e_destroymap();
+    insdata.mdata = load_map(path);
+    if (insdata.mdata == NULL) return D_O_K;
+    insdata.flags |= F_MAP_OPENED; 
     return D_O_K;
 }
     
@@ -283,14 +298,34 @@ int file_exit()
     
 int file_save()
 {
+    int ret;
+    char path[1024];
+    memset(path, 0, 1024);
+    
+    ret = file_select_ex("Save a Map file.", path, NULL, 1023, 0, 0);
+    if (ret != 0) return D_O_K;
+    
+    save_map(insdata.mdata, path);
+    
     return D_O_K;
 }
 
 int file_open_tiles() {
+    int ret;
+    char path[1024];
+    memset(path, 0, 1024);
+    
+    ret = file_select_ex("Load a Tileset file.", path, NULL, 1023, 0, 0);
+    if (ret != 0) return D_O_K;
+    
+    ret = load_tiles(path);
+    
+    
     return D_O_K;
 }
     
 int file_close_tiles() {
+    clear_tiles();
     return D_O_K;
 }    
     
