@@ -20,12 +20,14 @@ tile *load_tiles(const char *filename)
     return NULL;
   w = pack_igetl(file);
   h = pack_igetl(file);
-  len = pack_igetl(file);
-  pack_fread(filename_, len, file);
-  filename_[len] = '\0';
-  src = load_bitmap(filename_, NULL);
-  ta = src->w / w;
-  td = src->h / h;
+  //len = pack_igetl(file);
+  //pack_fread(filename_, len, file);
+  //filename_[len] = '\0';
+  //src = load_bitmap(filename_, NULL);
+  //ta = src->w / w;
+  //td = src->h / h;
+  ta = pack_igetl(file);
+  td = pack_igetl(file);
   ret = (tile *)malloc(sizeof(tile) * ((ta * td) + 1));
   for(y = 0; y < td; ++y)
   {
@@ -42,7 +44,6 @@ tile *load_tiles(const char *filename)
         for(x2 = 0; x2 < w; ++x2)
         {
           putpixel(ret[i].bmp, x2, y2, makecol(pack_igetl(file), pack_igetl(file), pack_igetl(file)));
-          file = pack_fclose_chunk(file);
         }
       }
       file = pack_fclose_chunk(file);

@@ -34,6 +34,8 @@ int main(int argc, char *argv[])
   pack_iputl(h, file);
   //pack_iputl(fnlen, file);
   //pack_fwrite(filename, fnlen, file);
+  pack_iputl(ta, file);
+  pack_iputl(td, file);
   for(y = 0; y < td; ++y)
   {
     for(x = 0; x < ta; ++x)
