@@ -148,8 +148,8 @@ int e_load_tiles(char *filename) {
     
     insdata.flags |= F_TILES_LOADED;
     
-    for (g=0;insdata.tlr[g].bmp == NULL;g++);
-    
+    for (g=0;insdata.tlr[g].bmp != NULL;g++);
+    insdata.tiles = g;
     insdata.psd = malloc(sizeof(BITMAP *)*g);
     
     for (h=0;h<g;h++) {
@@ -267,8 +267,8 @@ int e_map_proc(int msg, DIALOG *d, int c) {
         case MSG_DRAW:
             clear_bitmap(d->dp);
             if (insdata.mdata != NULL && (insdata.flags & F_TILES_LOADED) && (insdata.flags & F_MAP_OPENED)) {
-                for (y=insdata.y;y<insdata.mdata->h && y<(d->h/40)+1;y++) {
-                    for (x=insdata.x;x<insdata.mdata->w && x<(d->w/40)+1;x++) {
+                for (y=insdata.y;y<insdata.mdata->h && (y-insdata.y)<(d->h/40)+1;y++) {
+                    for (x=insdata.x;x<insdata.mdata->w && (x-insdata.x)<(d->w/40)+1;x++) {
                         if (insdata.mdata->layers[insdata.curlayer].data[y][x].tile >= insdata.tiles) {
                             blit(insdata.eda[0].dat, d->dp, 0, 0, (40*(x-insdata.x)), (40*(y-insdata.y)), 40, 40);  
                         }
