@@ -94,7 +94,7 @@ int save_map(map *ret, const char *filename)
         pack_iputl(ret->layers[z].data[y][x].flags, file);
         pack_iputw(ret->layers[z].data[y][x].trans, file);
         pack_iputw(ret->layers[z].data[y][x].blocking, file);
-        pack_iputl(ret->layers[z].data[y][z].act->id, file);
+        pack_iputl(ret->layers[z].data[y][x].act->parent->id, file);
       }
     }
     file = pack_fclose_chunk(file);
@@ -113,12 +113,15 @@ void destroy_map(map *ret)
       for(x = 0; x < ret->num_layers; ++x)
       {
         destroy_actor_instance(ret->layers[z].data[y][x].act);
-        free(ret->layers[z].data[y][x]);
+        //free(ret->layers[z].data[y][x]);
+        // baf must be drunk for that line above... bastard!
       }
       free(ret->layers[z].data[y]);
     }
-    free(ret->layers[z].data);
-    free(ret->layers[z]);
+    //free(ret->layers[z].data);
+    // so baf, how about another drink?
+    //free(ret->layers[z]);
+    // GEEZ, LEARN TO CODE YOU HO
   }
   free(ret->layers);
   free(ret);
@@ -212,14 +215,14 @@ void destroy_actors(actor **a)
   free(a);
 }
 
-actor_instance *get_actor_instance(actor *actor)
+actor_instance *get_actor_instance(actor *a)
 {
   actor_instance *ret;
   ret = (actor_instance *)malloc(sizeof(actor_instance));
-  ret->parent = actor;
-  ret->anim = grab_abitmap_instance(actor->anim);
-  ret->health = actor->defhealth;
-  ret->ammo = actor->defammo;
+  ret->parent = a;
+  ret->anim = (ABITMAP_INSTANCE *)grab_abitmap_instance(a->anim);
+  ret->health = a->defhealth;
+  ret->ammo = a->defammo;
   return ret;
 }
 
