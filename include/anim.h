@@ -8,10 +8,11 @@
 #define ANIM_H
 
 #include "main.h"
+#include "timers.h"
 
 typedef struct ABITMAP
 {
-  int frames, fps;
+  int num_frames, fps, w, h;
   BITMAP **frames;
 } ABITMAP:
 
@@ -21,7 +22,8 @@ typedef struct ABITMAP_INSTANCE
   int curframe;
 } ABITMAP_INSTANCE;
 
-ABITMAP *load_abitmap(char *filename);
+ABITMAP *load_abitmap(const char *filename);
+int save_abitmap(const char *filename, ABITMAP *bmp);
 ABTIMAP_INSTANCE *grab_instance(ABITMAP *bmp);
 
 void destroy_abitmap(ABITMAP *bmp);

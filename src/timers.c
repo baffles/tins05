@@ -6,7 +6,7 @@
 
 #include "main.h"
 
-volatile int fps = 0, cfps = 0, game_time = 0, fpsct = 0;
+volatile int fps = 0, cfps = 0, game_time = 0, fpsct = 0, anim_counter = 0;
 
 int install_timers()
 {
@@ -14,8 +14,9 @@ int install_timers()
   LOCK_VARIABLE(cfps);
   LOCK_VARIABLE(game_time);
   LOCK_VARIABLE(fpsct);
+  LOCK_VARIABLE(anim_counter);
   LOCK_FUNCTION(game_timer);
-  return install_int_ex(game_timer, BPS_TO_TIMER(60));
+  return install_int_ex(game_timer, BPS_TO_TIMER(60)) == 0 ? install_int_ex(anim_timer, BPS_TO_TIMER(60)) : 1;
 }
 
 void uninstall_timers()
@@ -33,3 +34,9 @@ void game_time()
   }
 }
 END_OF_FUNCTION(game_timer)
+
+void anim_timer()
+{
+  ++anim_counter;
+}
+END_OF_FUNTION(anim_timer);

@@ -9,11 +9,12 @@
 
 #include "main.h"
 
-extern volatile int fps, cfps, game_time;
+extern volatile int fps, cfps, game_time, anim_counter;
 
 int install_timers();
 void uninstall_timers();
 
 void game_timer();
+void anim_timer();
 
 #endif
