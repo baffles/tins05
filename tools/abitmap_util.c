@@ -55,9 +55,12 @@ int main()
     install_timers();
     set_gfx_mode(GFX_AUTODETECT, 800, 600, 0, 0);
     buffer = create_bitmap(SCREEN_W, SCREEN_H);
+    i = 0;
     while(!key[KEY_ESC])
     {
-      update_animation(cur_i);
+      if(i != anim_counter)
+        update_animation(cur_i);
+      i = anim_counter;
       vsync();
       clear_bitmap(buffer);
       ablit(cur_i, buffer, 0, 0);
@@ -65,6 +68,7 @@ int main()
       textprintf_right_ex(buffer, font, SCREEN_W, 10, makecol(255,255,255), makecol(0,0,0), "%d", anim_counter % (60 / cur->fps));
       textprintf_right_ex(buffer, font, SCREEN_W, 20, makecol(255,255,255), makecol(0,0,0), "DEBUG - cur frame count: %d", anim_counter);
       blit(buffer, screen, 0, 0, 0, 0, SCREEN_W, SCREEN_H);
+      //sleep(60 / cur->fps + 10);
     }
   }
   else

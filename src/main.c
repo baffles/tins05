@@ -7,8 +7,13 @@
 #include "main.h"
 #include "timers.h"
 #include "anim.h"
-#error i dont want this compiling atm.
+#include "render.h"
+//#error i dont want this compiling atm.
 FILE *logfile = NULL;
+DUH *beyondfo;
+DUH *ck094;
+AL_DUH_PLAYER *dumbp;
+ALFONT_FONT *tfont;
 
 int init()
 {
@@ -25,7 +30,7 @@ int init()
   set_config_file("./game.ini");
   BASSERT(install_keyboard() == 0);
   BASSERT(install_timer() == 0);
-  if(install_mouse() != 0)
+  if(install_mouse() < 0)
     BLOG("Couldn't initialize mouse... non-fatal, continuing.");
   if(install_sound(DIGI_AUTODETECT, MIDI_AUTODETECT, NULL) != 0)
     BLOG("Couldn't install a sound driver... non-fatal, continuing.");
@@ -49,6 +54,15 @@ int init()
     }
   }
   BASSERT(install_timers());
+  /*dumb_register_packfiles();
+  beyondfo = dumb_load_mod("../media/music.dat#BEYONDFO");
+  ck094 = dumb_load_it("../media/music.dat#CK094");*/
+  dumb_register_stdfiles();
+  beyondfo = dumb_load_mod("../beyondfo.mod");
+  ck094 = dumb_load_it("../media/ck094.it");
+  alfont_init();
+  tfont = alfont_load_font("../media/BIRDMAN.TTF");
+  alfont_set_font_size(tfont, 14);
 }
 
 void deinit()
@@ -56,21 +70,30 @@ void deinit()
   if(logfile)
     fclose(logfile);
   logfile = NULL;
+  unload_duh(beyondfo);
+  unload_duh(ck094);
+  dumb_exit();
+  alfont_destroy_font(tfont);
+  alfont_exit();
 }
-
+void this_is_temporary() { al_poll_duh(dumbp); }
 
 void introduction()
 {
   BITMAP *logo;
+  dumbp = al_start_duh(beyondfo, 2, 0, 1.0f, 4096, 4410);
   logo = load_bitmap("../media/logo86.bmp", NULL);
   blit(logo, screen, 0, 0, 0, 0, 800, 600);
+  install_int_ex(this_is_temporary, BPS_TO_TIMER(2));
   sleep(3000);
+  al_stop_duh(dumbp);
 }
 
 int menu()
 {
-  BITMAP *logo;
-  logo = load_bitmap("../media/logo.bmp", NULL);
+  BITMAP *logo, *buffer;
+  logo = load_bitmap("../media/teampink.bmp", NULL);
+  buffer = create_bitmap(SCREEN_W, SCREEN_H);
   int done = 0;
   while(!done)
   {
@@ -82,11 +105,23 @@ int menu()
       --game_time;
     }
     while(game_time < 0); // let it catch up
-    blit(logo, screen, 0, 0, (SCREEN_W / 2) - (logo->w / 2), 0, logo->w, logo->h);
-    textprintf_right_ex(screen, font, SCREEN_W, 0, makecol(255,255,255), makecol(0,0,0), "FPS: %d", fps);
-    masked_blit(mouse_sprite, screen, 0, 0, mouse_x, mouse_y, mouse_sprite->w, mouse_sprite->h);
+    clear_bitmap(buffer);
+    masked_blit(logo, buffer, 0, 0, (SCREEN_W / 2) - (logo->w / 2), 0, logo->w, logo->h);
+    textprintf_right_ex(buffer, font, SCREEN_W, 0, makecol(255,255,255), makecol(0,0,0), "FPS: %d", fps);
+    alfont_textout_centre_aa_ex(buffer, tfont, "Welcome to... gamename!", SCREEN_W / 2, logo->h, makecol(128, 255, 128), -1);
+    draw_sine(100, buffer, 0, 0, SCREEN_W, SCREEN_H, makecol(255,128,0));
+    draw_sine(100, buffer, 0, 0, SCREEN_W, SCREEN_H, makecol(255,128,0));
+    draw_sine(100, buffer, 0, 0, SCREEN_W, SCREEN_H, makecol(255,128,0));
+    draw_sine(100, buffer, 0, 0, SCREEN_W, SCREEN_H, makecol(255,128,0));
+    draw_sine(100, buffer, 0, 0, SCREEN_W, SCREEN_H, makecol(255,128,0));
+    draw_sine(100, buffer, 0, 0, SCREEN_W, SCREEN_H, makecol(255,128,0));
+    draw_sine(100, buffer, 0, 0, SCREEN_W, SCREEN_H, makecol(255,128,0));
+    draw_sine(100, buffer, 0, 0, SCREEN_W, SCREEN_H, makecol(255,128,0));
+    masked_blit(mouse_sprite, buffer, 0, 0, mouse_x, mouse_y, mouse_sprite->w, mouse_sprite->h);
+    blit(buffer, screen, 0, 0, 0, 0, SCREEN_W, SCREEN_H);
     ++cfps;
   }
+  destroy_bitmap(buffer);
 }
 
 void game()

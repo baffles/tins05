@@ -43,6 +43,6 @@ typedef struct map
 
 map *load_map(char *filename);
 int save_map(map *map, char *filename);
-int destroy_map(map *map);
+void destroy_map(map *map);
 
 #endif
